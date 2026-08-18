@@ -1,0 +1,31 @@
+[project]
+name = "financial-doc-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Rakebul Hasan", email = "rhasan@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dagster>=1.13.18",
+    "dagster-webserver>=1.13.18",
+    "httpx>=0.28.1",
+]
+
+[project.scripts]
+financial-doc-ai = "financial_doc_ai:main"
+
+[build-system]
+requires = ["uv_build>=0.11.15,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+    "vcrpy>=8.3.0",
+]
+
+[tool.dagster]
+module_name = "financial_doc_ai.definitions"

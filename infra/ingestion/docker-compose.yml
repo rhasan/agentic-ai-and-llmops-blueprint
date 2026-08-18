@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: ../..                          # repo root — so COPY sees pyproject/src
+      dockerfile: infra/ingestion/Dockerfile  # path relative to context
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../..:/app          # live code edits; path is relative to this compose file
+      - /app/.venv          # keep container venv, don't shadow with host
+      - dagster_home:/opt/dagster_home
+    environment:
+      - DAGSTER_HOME=/opt/dagster_home
+    env_file:
+      - ../../.env          # .env at repo root
+
+volumes:
+    dagster_home:
