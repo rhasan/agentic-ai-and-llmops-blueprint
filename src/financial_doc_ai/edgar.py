@@ -1,5 +1,13 @@
 import time
 import httpx
+from tenacity import (
+    retry, stop_after_attempt, wait_exponential,
+    retry_if_exception_type
+)
+
+class RetryableError(Exception):
+    """A transient failure worth retrying (429 / 5xx)."""
+
 
 class EdgarClient:
     """Downloads filings from SEC EDGAR.
@@ -12,10 +20,26 @@ class EdgarClient:
     SUBMISSIONS = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
     DOC = "https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/{doc}"
 
-    def __init__(self, user_agent: str, min_interval: float = 0.15):
-        self._client = httpx.Client(headers={"User-Agent": user_agent}, timeout=30.0)
+    def __init__(self, user_agent: str, min_interval: float = 0.15, transport=None):
+        self._client = httpx.Client(headers={"User-Agent": user_agent}, timeout=30.0, transport=transport)
         self._min_interval = min_interval  # ~6-7 req/s, safely under SEC's ~10
         self._last = 0.0
+
+    @retry(
+        retry=retry_if_exception_type((RetryableError, httpx.TransportError)),
+        wait=wait_exponential(multiplier=1, max=30),
+        stop=stop_after_attempt(5),
+        reraise=True,
+    )
+    def _get(self, url:str) -> httpx.Response:
+        self._throttle()
+        r = self._client.get(url)
+        if r.status_code == 429 or r.status_code >= 500:
+            raise RetryableError(f"{r.status_code} for {url}")
+        r.raise_for_status()
+        return r
+
+
 
     def _throttle(self) -> None:
         wait = self._min_interval - (time.monotonic() - self._last)
@@ -32,9 +56,7 @@ class EdgarClient:
         Returns small dicts (accession, form, filing_date, primary_doc) — the
         list only, not the file contents.
         """
-        self._throttle()
-        r = self._client.get(self.SUBMISSIONS.format(cik=cik))
-        r.raise_for_status()
+        r = self._get(self.SUBMISSIONS.format(cik=cik))
         recent = r.json()["filings"]["recent"]
         out = []
 
@@ -58,8 +80,6 @@ class EdgarClient:
         Takes one filing's IDs (from `recent_filings`), builds its document
         URL, downloads it, and returns the raw bytes.
         """
-        self._throttle()
         acc = accession.replace("-","")
-        r = self._client.get(self.DOC.format(cik=cik, acc=acc, doc=primary_doc))
-        r.raise_for_status()
+        r = self._get(self.DOC.format(cik=cik, acc=acc, doc=primary_doc))
         return r.content
