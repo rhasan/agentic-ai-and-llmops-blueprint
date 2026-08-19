@@ -10,6 +10,12 @@ from financial_doc_ai.storage import RawStore
 
 @dg.asset
 def raw_filings(context: dg.AssetExecutionContext) -> None:
+    """Download recent filings and store them.
+
+    Ties the client and store together: gets the list of recent filings
+    (currently 3 Apple 10-Ks), downloads each one, and hands the bytes to
+    RawStore to save and record. Duplicates are skipped by content hash.
+    """
     client = EdgarClient(user_agent=os.environ["EDGAR_USER_AGENT"])
     store = RawStore(Path("/app/data"))
 

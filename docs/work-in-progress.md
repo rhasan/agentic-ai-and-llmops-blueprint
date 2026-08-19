@@ -8,7 +8,7 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 2. **Container** — `infra/ingestion/Dockerfile` + `docker-compose.yml`, runs `dagster dev`. Single execution path. Persistent `DAGSTER_HOME` on a named volume. ✅ Done (hello-world asset materializes)
 3. **Storage/manifest contract + local-FS store** — `manifest.py` (`ManifestRecord`) + `storage.py` (`RawStore`), JSONL manifest, content-addressed raw files. ✅ Done (idempotency verified via smoke test)
 4. **EDGAR client → `raw_filings` Dagster asset** — `edgar.py` (throttled httpx client) + `raw_filings` asset. ✅ Done (fetched 3 Apple 10-Ks, ~1.5 MB each, into raw store + manifest)
-5. **VCR.py test**, run in-container ⏳ Next
+5. **VCR.py test** — `tests/test_edgar.py`, one cassette per test (`record_mode="once"`, `filter_headers` strips User-Agent). Covers `recent_filings` + `fetch_document`, replays offline. ✅ Done (both pass, no network)
 
 ## What the downloaded files are (10-K filings)
 
@@ -27,9 +27,9 @@ Format: **HTML with inline XBRL**. Key numbers are machine-tagged (e.g. `us-gaap
 
 ## Next session — pick up here
 
-- **Generalize `raw_filings`** — CIK/form are currently hardcoded to Apple (320193, 10-K). Make it config-driven via Dagster run config (pick company/form at materialize time, no code edit). Do this *before* step 5 so the VCR.py test pins the generalized behavior (avoids writing the test twice).
-- Then **step 5** — VCR.py deterministic test so ingestion runs in CI without hitting EDGAR.
-- Housekeeping done today: stray `test-1` smoke record removed; manifest holds the 3 Apple 10-Ks only.
+- **Step 5** — VCR.py deterministic test so ingestion runs in CI without hitting EDGAR.
+- Apple CIK/form stay hardcoded for now — generalizing is not needed yet, revisit only when something requires it.
+- Housekeeping done: stray `test-1` smoke record removed; manifest holds the 3 Apple 10-Ks only.
 
 ## Step 1 — Project skeleton
 
