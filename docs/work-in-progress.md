@@ -11,6 +11,7 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 5. **VCR.py test** — `tests/test_edgar.py`, one cassette per test (`record_mode="once"`, `filter_headers` strips User-Agent). Covers `recent_filings` + `fetch_document`, replays offline. ✅ Done (both pass, no network)
 6. **Retries with exponential backoff** — `_get` in `edgar.py` uses tenacity: retry on 429/5xx + transport errors, exp backoff, 5 attempts, reraise on give-up. Transport seam in `__init__` for testing. `tests/test_edgar_retry.py` (retry-then-succeed, give-up) uses `httpx.MockTransport`. ✅ Done (4 tests pass). No `Retry-After` handling yet — deferred.
 7. **Contract acquisition & storyline** — Selected and downloaded 3 Apple material contracts into `data/raw/seed_contracts/AAPL/` and created `docs/contracts-storyline.md` connecting them to Apple 10-K sections for cross-document Q&A (*Governance, Equity Plans & Supply Chain Risk*). ✅ Done
+8. **Parsing** — Extracted raw HTML filings into clean Markdown using BeautifulSoup and markdownify, retaining tables per design, with idempotency handled in `ParsedStore`. Added to Dagster asset DAG. ✅ Done
 
 ## What the downloaded files are
 
@@ -38,7 +39,7 @@ See [contracts-storyline.md](contracts-storyline.md) for full context, 10-K sect
 
 ## Next session — pick up here
 
-- **Parsing** — take a stored raw 10-K, extract its text (tables kept whole, per `initial-system-description.md`), ready for chunking later. 10-K is HTML with inline XBRL.
+- **Chunking** — implement the Semantic Chunking strategy (defined in `docs/chunking-strategy.md`) to split parsed Markdown into semantic chunks while keeping financial tables completely intact.
 - Apple CIK/form stay hardcoded for now — generalizing is not needed yet, revisit only when something requires it.
 - Deferred: `Retry-After` header handling on 429s.
 

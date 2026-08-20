@@ -8,9 +8,11 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.15.0",
     "dagster>=1.13.18",
     "dagster-webserver>=1.13.18",
     "httpx>=0.28.1",
+    "markdownify>=1.2.3",
     "tenacity>=9.1.4",
 ]
 

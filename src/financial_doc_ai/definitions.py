@@ -1,11 +1,13 @@
 import os
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 import dagster as dg
 
 from financial_doc_ai.edgar import EdgarClient
-from financial_doc_ai.storage import RawStore
+from financial_doc_ai.storage import RawStore, ParsedStore
+from financial_doc_ai.parser import FilingParser
 
 
 @dg.asset
@@ -38,4 +40,46 @@ def raw_filings(context: dg.AssetExecutionContext) -> None:
         )
         context.log.info(f"{'stored' if rec else 'skipped (dup)'}: {f['accession']}")
 
-defs = dg.Definitions(assets=[raw_filings])
+
+@dg.asset(deps=[raw_filings])
+def parsed_filings(context: dg.AssetExecutionContext) -> None:
+    """Parses raw HTML filings into clean Markdown."""
+    raw_store = RawStore(Path("/app/data"))
+    parsed_store = ParsedStore(Path("/app/data"))
+    parser = FilingParser()
+
+    if not raw_store.manifest_path.exists():
+        context.log.info("No raw filings to parse.")
+        return
+
+    # Loop through the raw manifest to find files we've downloaded
+    with raw_store.manifest_path.open() as f:
+        for line in f:
+            rec = json.loads(line)
+            
+            # Idempotency check: Have we already parsed this one?
+            if parsed_store.has_natural_id(rec["natural_id"]):
+                context.log.info(f"Skipping already parsed: {rec['natural_id']}")
+                continue
+            
+            raw_path = raw_store.root / rec["storage_path"]
+            if not raw_path.exists():
+                context.log.warning(f"Raw file missing for {rec['natural_id']}")
+                continue
+
+            context.log.info(f"Parsing: {rec['natural_id']}")
+            
+            # Read raw bytes, parse them, and store the markdown
+            html_bytes = raw_path.read_bytes()
+            md_text = parser.parse_html(html_bytes)
+            
+            parsed_store.put(
+                text=md_text,
+                source=rec["source"],
+                natural_id=rec["natural_id"],
+                fetched_at=datetime.now(timezone.utc).isoformat(),
+                source_metadata=rec.get("source_metadata", {})
+            )
+            context.log.info(f"Successfully parsed and stored: {rec['natural_id']}")
+
+defs = dg.Definitions(assets=[raw_filings, parsed_filings])
