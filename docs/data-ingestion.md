@@ -2,7 +2,7 @@
 
 ## Data sources
 - **Filings (feed):** SEC **EDGAR** — 10-K/10-Q/8-K, free, no auth (`User-Agent` required, ~10 req/s). SEC Financial Statement Data Sets + XBRL/Frames API give structured ground-truth numbers to reconcile against parse/OCR.
-- **Contracts (upload):** **CUAD** (510 contracts, 13k+ clause annotations) primary; LEDGAR + EDGAR material-contract exhibits add messier/scanned OCR cases.
+- **Contracts (upload / seed):** Sized down for blueprint to **3 Apple material contracts** (Director Stock Plan `EX-10.1`, RSU Agreement `EX-10.2`, Component Purchase Agreement `EX-10.B.19`) downloaded to `data/raw/seed_contracts/AAPL/`. See [contracts-storyline.md](contracts-storyline.md) for the cross-document Q&A narrative (*Governance, Equity Plans & Supply Chain Risk*). CUAD/LEDGAR remain the broader benchmark reference for clause annotations.
 
 ## EDGAR = plain client, not MCP
 Acquisition is scheduler-driven batch with no LLM in the loop, so MCP (a runtime tool-calling protocol) is the wrong layer. Test: *is an LLM deciding, at runtime, to call this?* No → plain client. MCP is justified only for an optional future runtime "fetch-if-missing" tool.

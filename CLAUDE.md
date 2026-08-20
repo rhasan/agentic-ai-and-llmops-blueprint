@@ -17,7 +17,8 @@ A **blueprint / reference implementation** demonstrating production-grade patter
 ## Docs (read these for context)
 
 - `docs/initial-system-description.md` — the example system (financial-doc Q&A). Its scale figures are properties of the example, not blueprint constraints.
-- `docs/data-ingestion.md` — data sources (EDGAR + CUAD) and the ingestion architecture decisions.
+- `docs/data-ingestion.md` — data sources (EDGAR + contracts) and the ingestion architecture decisions.
+- `docs/contracts-storyline.md` — the 3 sample contracts, 10-K connections, and cross-document Q&A storyline (*Governance, Equity Plans & Supply Chain Risk*).
 - `docs/work-in-progress.md` — **the live progress tracker.** Read this first to see where the build is and what's next.
 
 ## Stack & layout

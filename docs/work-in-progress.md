@@ -10,9 +10,11 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 4. **EDGAR client → `raw_filings` Dagster asset** — `edgar.py` (throttled httpx client) + `raw_filings` asset. ✅ Done (fetched 3 Apple 10-Ks, ~1.5 MB each, into raw store + manifest)
 5. **VCR.py test** — `tests/test_edgar.py`, one cassette per test (`record_mode="once"`, `filter_headers` strips User-Agent). Covers `recent_filings` + `fetch_document`, replays offline. ✅ Done (both pass, no network)
 6. **Retries with exponential backoff** — `_get` in `edgar.py` uses tenacity: retry on 429/5xx + transport errors, exp backoff, 5 attempts, reraise on give-up. Transport seam in `__init__` for testing. `tests/test_edgar_retry.py` (retry-then-succeed, give-up) uses `httpx.MockTransport`. ✅ Done (4 tests pass). No `Retry-After` handling yet — deferred.
+7. **Contract acquisition & storyline** — Selected and downloaded 3 Apple material contracts into `data/raw/seed_contracts/AAPL/` and created `docs/contracts-storyline.md` connecting them to Apple 10-K sections for cross-document Q&A (*Governance, Equity Plans & Supply Chain Risk*). ✅ Done
 
-## What the downloaded files are (10-K filings)
+## What the downloaded files are
 
+### 1. 10-K Filings
 Each raw file is a **10-K** — a company's mandatory annual report to the SEC (once a year, ~hundreds of pages). We fetched Apple's for FY2025/2024/2023.
 
 Standard 10-K sections (same structure across all companies):
@@ -25,6 +27,14 @@ Standard 10-K sections (same structure across all companies):
 Format: **HTML with inline XBRL**. Key numbers are machine-tagged (e.g. `us-gaap:RevenueFromContract...`, `ix:nonNumeric` tags). This gives two uses of the same file:
 - **Human text** (business, risk factors) → what RAG retrieves and cites.
 - **Tagged XBRL numbers** → exact ground-truth figures to verify answers against (ties to the "reconcile against ground truth" point in [data-ingestion.md](data-ingestion.md)).
+
+### 2. Material Contracts (Exhibit 10s)
+Downloaded 3 PDFs into `data/raw/seed_contracts/AAPL/` to ground high-level 10-K disclosures in legal text:
+- `320193_000114036126006577_ef20060722_ex10-1.pdf` — **Director Stock Plan (`EX-10.1`)** (Governance / Compensation caps).
+- `320193_000114036126006577_ef20065677_ex10-2.pdf` — **Form of RSU Award Agreement (`EX-10.2`)** (Equity vesting / Forfeiture).
+- `320193_000110465905058421_a05-20674_1ex10dbd19.pdf` — **Component Purchase Agreement (`EX-10.B.19`)** (Supply chain risk / Supplier remedies).
+
+See [contracts-storyline.md](contracts-storyline.md) for full context, 10-K section pairings, and showcase analyst queries.
 
 ## Next session — pick up here
 
