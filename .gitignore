@@ -20,6 +20,8 @@ Thumbs.db
 .vscode/
 .idea/
 
+# pytest
+.pytest_cache
 
 # Claude related
 # .claude
