@@ -12,6 +12,7 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 6. **Retries with exponential backoff** — `_get` in `edgar.py` uses tenacity: retry on 429/5xx + transport errors, exp backoff, 5 attempts, reraise on give-up. Transport seam in `__init__` for testing. `tests/test_edgar_retry.py` (retry-then-succeed, give-up) uses `httpx.MockTransport`. ✅ Done (4 tests pass). No `Retry-After` handling yet — deferred.
 7. **Contract acquisition & storyline** — Selected and downloaded 3 Apple material contracts into `data/raw/seed_contracts/AAPL/` and created `docs/contracts-storyline.md` connecting them to Apple 10-K sections for cross-document Q&A (*Governance, Equity Plans & Supply Chain Risk*). ✅ Done
 8. **Parsing** — Extracted raw HTML filings into clean Markdown using BeautifulSoup and markdownify, retaining tables per design, with idempotency handled in `ParsedStore`. Added to Dagster asset DAG. ✅ Done
+9. **Chunking** — `chunker.py` `MarkdownChunker`: custom code separates tables (kept whole) from prose, then LangChain `MarkdownHeaderTextSplitter` + `RecursiveCharacterTextSplitter` split prose by header then size (~8000 chars / 800 overlap ≈ 2000/200 tokens). `ChunkStore` in `storage.py` writes one JSON file per doc (`{natural_id, chunks}`) + `chunk_manifest.jsonl`, idempotent by natural_id. `chunked_filings` asset (deps on `parsed_filings`). DAG: raw → parsed → chunked. See [chunking-strategy.md](chunking-strategy.md). ✅ Done
 
 ## What the downloaded files are
 

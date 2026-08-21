@@ -87,3 +87,60 @@ class ParsedStore:
             f.write(record.to_json() + "\n")
             
         return record
+
+class ChunkStore:
+    """Stores the chunks of a document and records them in a manifest.
+
+    All chunks of one document are written together as a single JSON file,
+    and one line is appended to `chunk_manifest.jsonl` describing it.
+    """
+
+    def __init__(self, root: Path):
+        self.root = Path(root)
+        # Chunks get their own manifest, separate from raw and parsed.
+        self.manifest_path = self.root / "chunk_manifest.jsonl"
+
+    def has_natural_id(self, natural_id: str) -> bool:
+        """Check if we've already chunked the document with this ID."""
+        if not self.manifest_path.exists():
+            return False
+        with self.manifest_path.open() as f:
+            return any(json.loads(line)["natural_id"] == natural_id for line in f)
+
+    def put(
+        self,
+        chunks: list[dict],
+        source: str,
+        natural_id: str,
+        fetched_at: str,
+        source_metadata: dict,
+    ) -> ManifestRecord | None:
+        # Idempotency: skip if this document has already been chunked.
+        if self.has_natural_id(natural_id):
+            return None
+
+        # Write all chunks of this document into one JSON file. The chunks are
+        # only meaningful together, so we don't split them across files.
+        payload = json.dumps(
+            {"natural_id": natural_id, "chunks": chunks}, ensure_ascii=False
+        )
+        # Name the file by the hash of its contents, same as the other stores.
+        h = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        path = self.root / "chunks" / source / f"{h}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(payload, encoding="utf-8")
+
+        # Record a manifest line pointing to that file. We also stash the
+        # chunk count in the metadata so it's easy to inspect without opening
+        # the file.
+        record = ManifestRecord(
+            natural_id=natural_id,
+            content_hash=h,
+            source=source,
+            storage_path=str(path.relative_to(self.root)),
+            fetched_at=fetched_at,
+            source_metadata={**source_metadata, "chunk_count": len(chunks)},
+        )
+        with self.manifest_path.open("a") as f:
+            f.write(record.to_json() + "\n")
+        return record

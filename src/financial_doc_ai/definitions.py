@@ -6,8 +6,9 @@ from pathlib import Path
 import dagster as dg
 
 from financial_doc_ai.edgar import EdgarClient
-from financial_doc_ai.storage import RawStore, ParsedStore
+from financial_doc_ai.storage import RawStore, ParsedStore, ChunkStore
 from financial_doc_ai.parser import FilingParser
+from financial_doc_ai.chunker import MarkdownChunker
 
 
 @dg.asset
@@ -82,4 +83,43 @@ def parsed_filings(context: dg.AssetExecutionContext) -> None:
             )
             context.log.info(f"Successfully parsed and stored: {rec['natural_id']}")
 
-defs = dg.Definitions(assets=[raw_filings, parsed_filings])
+
+@dg.asset(deps=[parsed_filings])
+def chunked_filings(context: dg.AssetExecutionContext) -> None:
+  """Chunks parsed Markdown into retrieval units, keeping tables whole."""
+  parsed_store = ParsedStore(Path("/app/data"))
+  chunk_store = ChunkStore(Path("/app/data"))
+  chunker = MarkdownChunker()
+
+  # Nothing to do if the parse stage hasn't produced anything yet.
+  if not parsed_store.manifest_path.exists():
+      context.log.info("No parsed filings to chunk.")
+      return
+
+  # Go through every parsed document listed in the parsed manifest.
+  with parsed_store.manifest_path.open() as f:
+      for line in f:
+          rec = json.loads(line)
+          # Skip documents we've already chunked (idempotent re-runs).
+          if chunk_store.has_natural_id(rec["natural_id"]):
+              context.log.info(f"Skipping already chunked: {rec['natural_id']}")
+              continue
+          # The parsed Markdown file the manifest line points to.
+          parsed_path = parsed_store.root / rec["storage_path"]
+          if not parsed_path.exists():
+              context.log.warning(f"Parsed file missing for {rec['natural_id']}")
+              continue
+
+          # Read the Markdown, split it into chunks, and store them.
+          md = parsed_path.read_text(encoding="utf-8")
+          chunks = chunker.chunk(md)
+          chunk_store.put(
+              chunks=chunks, source=rec["source"],
+              natural_id=rec["natural_id"],
+              fetched_at=datetime.now(timezone.utc).isoformat(),
+              source_metadata=rec.get("source_metadata", {}),
+          )
+          context.log.info(f"Chunked {rec['natural_id']}: {len(chunks)} chunks")
+
+
+defs = dg.Definitions(assets=[raw_filings, parsed_filings, chunked_filings])
