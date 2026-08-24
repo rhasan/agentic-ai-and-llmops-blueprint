@@ -13,6 +13,7 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 7. **Contract acquisition & storyline** — Selected and downloaded 3 Apple material contracts into `data/raw/seed_contracts/AAPL/` and created `docs/contracts-storyline.md` connecting them to Apple 10-K sections for cross-document Q&A (*Governance, Equity Plans & Supply Chain Risk*). ✅ Done
 8. **Parsing** — Extracted raw HTML filings into clean Markdown using BeautifulSoup and markdownify, retaining tables per design, with idempotency handled in `ParsedStore`. Added to Dagster asset DAG. ✅ Done
 9. **Chunking** — `chunker.py` `MarkdownChunker`: custom code separates tables (kept whole) from prose, then LangChain `MarkdownHeaderTextSplitter` + `RecursiveCharacterTextSplitter` split prose by header then size (~8000 chars / 800 overlap ≈ 2000/200 tokens). `ChunkStore` in `storage.py` writes one JSON file per doc (`{natural_id, chunks}`) + `chunk_manifest.jsonl`, idempotent by natural_id. `chunked_filings` asset (deps on `parsed_filings`). DAG: raw → parsed → chunked. See [chunking-strategy.md](chunking-strategy.md). ✅ Done
+10. **Embedding & vector index** — `embedder.py` `Embedder`: thin LiteLLM `embedding()` wrapper (embed-only, dumb client), provider-agnostic via `EMBEDDING_MODEL` model string + generic api-base env; preserves input order by sorting `response.data` on index. `vector_store.py` `VectorStore`: Chroma `PersistentClient(data/chroma/)`, collection `chunks`, `has_natural_id` idempotency seam, `add_chunks` (id = `natural_id:chunk_index`, flattens `headers` to scalar metadata, records embedding-model name per chunk). `embedded_chunks` asset (deps on `chunked_filings`) walks `chunk_manifest.jsonl`, batch-embeds each un-embedded doc, writes vectors + metadata. Ollama runs as a compose service (`nomic-embed-text`, 768-dim, auto-pulled; Zscaler-proxy CA handled via `Dockerfile.ollama`). DAG: raw → parsed → chunked → embedded. Tests: `test_embedder.py` (unit, mocked provider, order preservation), `test_vector_store.py` (hermetic integration, real ephemeral Chroma). See [embedding-strategy.md](embedding-strategy.md). ✅ Done (415 vectors materialized)
 
 ## What the downloaded files are
 
@@ -40,9 +41,10 @@ See [contracts-storyline.md](contracts-storyline.md) for full context, 10-K sect
 
 ## Next session — pick up here
 
-- **Chunking** — implement the Semantic Chunking strategy (defined in `docs/chunking-strategy.md`) to split parsed Markdown into semantic chunks while keeping financial tables completely intact.
+- **Online RAG / query path** — the offline corpus is complete (raw → parsed → chunked → embedded, 415 vectors in Chroma). Next is the query side: embed the question with the same `Embedder`, run a similarity search over the Chroma `chunks` collection, and return the top-k chunks + metadata for answer synthesis. Leave a seam for evaluation.
 - Apple CIK/form stay hardcoded for now — generalizing is not needed yet, revisit only when something requires it.
 - Deferred: `Retry-After` header handling on 429s.
+- Housekeeping: delete the throwaway `data/chroma_smoke/` dir; confirm `EMBEDDING_MODEL` + the renamed api-base var are in `.env.example`.
 
 ## Step 1 — Project skeleton
 

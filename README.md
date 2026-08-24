@@ -29,6 +29,11 @@ Build one coherent agentic AI application and the complete lifecycle around it:
 
 All development and pipeline execution runs via Docker (`dev == deploy`).
 
+> **Certificate issues?** On Windows behind a TLS-inspecting proxy (e.g. Zscaler),
+> run `powershell -ExecutionPolicy Bypass -File infra/ingestion/setup-cert.ps1` once
+> before the Docker commands. On any other machine, run the Docker commands
+> directly — no setup needed.
+
 ### 1. Environment Setup
 Copy the example environment file and configure your SEC EDGAR `User-Agent`:
 ```bash
@@ -45,6 +50,14 @@ docker compose -f infra/ingestion/docker-compose.yml run --rm app uv run pytest
 docker compose -f infra/ingestion/docker-compose.yml up --build
 ```
 Open [http://localhost:3000](http://localhost:3000) to view the asset graph and materialize `raw_filings`.
+
+## Skills
+
+Claude Code skills bundled with this repo (`.claude/skills/`). Invoke with `/<skill>`.
+
+| Skill | Description |
+|-------|-------------|
+| `progress-report` | Generates a status report of the build — what's done, % complete across the three blueprint areas, and remaining effort estimated in work-sessions. |
 
 ## License
 

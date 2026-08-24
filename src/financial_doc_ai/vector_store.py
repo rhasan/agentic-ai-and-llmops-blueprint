@@ -1,0 +1,55 @@
+"""Chroma wrapper — persists chunk embeddings + metadata for retrieval."""
+
+from pathlib import Path
+
+import chromadb
+from chromadb.config import Settings
+
+
+class VectorStore:
+    def __init__(self, path: Path, collection_name: str = "chunks") -> None:
+        # PersistentClient writes to disk (data/chroma/), so vectors survive
+        # container restarts. Telemetry off — no phone-home from a blueprint.
+        client = chromadb.PersistentClient(
+            path=str(path),
+            settings=Settings(anonymized_telemetry=False),
+        )
+        self.collection = client.get_or_create_collection(name=collection_name)
+
+    def has_natural_id(self, natural_id: str) -> bool:
+        # Ask for one row tagged with this document id; empty result => not stored.
+        result = self.collection.get(where={"natural_id": natural_id}, limit=1)
+        return len(result["ids"]) > 0
+
+    def add_chunks(
+        self,
+        natural_id: str,
+        chunks: list[dict],
+        embeddings: list[list[float]],
+        embedding_model: str,
+    ) -> None:
+        ids, metadatas = [], []
+        for chunk in chunks:
+            # Deterministic id: same doc+position => same id, so a re-add would
+            # overwrite rather than duplicate. natural_id ties chunks back to
+            # their source document.
+            ids.append(f"{natural_id}:{chunk['chunk_index']}")
+
+            meta = {
+                "natural_id": natural_id,
+                "chunk_index": chunk["chunk_index"],
+                "is_table": chunk["is_table"],
+                "embedding_model": embedding_model,
+            }
+            # Chroma metadata values must be scalars (no dicts/None). Flatten the
+            # header map, keeping only the levels that are present.
+            for level, text in chunk["headers"].items():
+                meta[level] = text
+            metadatas.append(meta)
+
+        self.collection.add(
+            ids=ids,
+            documents=[c["text"] for c in chunks],
+            embeddings=embeddings,
+            metadatas=metadatas,
+        )

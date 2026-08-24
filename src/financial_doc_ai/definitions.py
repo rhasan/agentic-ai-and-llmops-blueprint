@@ -9,6 +9,9 @@ from financial_doc_ai.edgar import EdgarClient
 from financial_doc_ai.storage import RawStore, ParsedStore, ChunkStore
 from financial_doc_ai.parser import FilingParser
 from financial_doc_ai.chunker import MarkdownChunker
+from financial_doc_ai.embedder import Embedder
+from financial_doc_ai.vector_store import VectorStore
+
 
 
 @dg.asset
@@ -122,4 +125,43 @@ def chunked_filings(context: dg.AssetExecutionContext) -> None:
           context.log.info(f"Chunked {rec['natural_id']}: {len(chunks)} chunks")
 
 
-defs = dg.Definitions(assets=[raw_filings, parsed_filings, chunked_filings])
+@dg.asset(deps=[chunked_filings])
+def embedded_chunks(context: dg.AssetExecutionContext) -> None:
+    """Embeds chunks and stores them in the vector store, idempotent per document."""
+    chunk_store = ChunkStore(Path("/app/data"))
+    vector_store = VectorStore(Path("/app/data/chroma"))
+    embedder = Embedder()
+
+    # Nothing to do if the chunk stage hasn't produced anything yet.
+    if not chunk_store.manifest_path.exists():
+        context.log.info("No chunked filings to embed.")
+        return
+
+    # Walk the chunk manifest, one line per chunked document.
+    with chunk_store.manifest_path.open() as f:
+        for line in f:
+            rec = json.loads(line)
+            # Skip documents already embedded (idempotent re-runs).
+            if vector_store.has_natural_id(rec["natural_id"]):
+                context.log.info(f"Skipping already embedded: {rec['natural_id']}")
+                continue
+
+            # The chunks file this manifest line points to.
+            chunk_path = chunk_store.root / rec["storage_path"]
+            if not chunk_path.exists():
+                context.log.warning(f"Chunk file missing for {rec['natural_id']}")
+                continue
+
+            # Load the chunks, embed their text, store vectors + metadata.
+            chunks = json.loads(chunk_path.read_text(encoding="utf-8"))["chunks"]
+            embeddings = embedder.embed([c["text"] for c in chunks])
+            vector_store.add_chunks(
+                natural_id=rec["natural_id"],
+                chunks=chunks,
+                embeddings=embeddings,
+                embedding_model=embedder.model,
+            )
+            context.log.info(f"Embedded {rec['natural_id']}: {len(chunks)} chunks")
+
+
+defs = dg.Definitions(assets=[raw_filings, parsed_filings, chunked_filings, embedded_chunks])
