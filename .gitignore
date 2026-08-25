@@ -13,9 +13,9 @@ __pycache__/
 !.env.example
 # Project specific secrets
 docs/refs
-# CA cert (machine/network-specific; run infra/ingestion/setup-cert.ps1)
-infra/ingestion/certs/*
-!infra/ingestion/certs/.gitkeep
+# CA cert (machine/network-specific; run infra/<stack>/setup-cert.ps1)
+infra/*/certs/*
+!infra/*/certs/.gitkeep
 
 # OS / Editor files
 .DS_Store

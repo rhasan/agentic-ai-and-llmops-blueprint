@@ -1,0 +1,67 @@
+interactions:
+- request:
+    body: '{"model": "qwen2.5:3b-instruct", "prompt": "### System:\nYou rewrite a
+      financial-analyst''s question into a structured retrieval request.\n\nReturn:\n-
+      query_type: \"compare\" ONLY when the analyst asks to contrast the SAME topic
+      or metric across multiple companies or multiple time periods (e.g. \"compare
+      Apple and Microsoft revenue\", \"how did revenue change from 2022 to 2024\").
+      Everything else is \"other\". In particular, checking whether two documents
+      agree or match (reconciliation), or asking about a single document or version,
+      is \"other\", NOT \"compare\".\n- rewritten_query: a single self-contained question
+      with any follow-up references resolved from the conversation. Keep company and
+      period words in the text. Do NOT introduce a comparison or any intent the question
+      does not already contain.\n- filters: extract a filter ONLY when the question
+      explicitly states it. If the question does not state a filter, set it to null.
+      Never infer, guess, or copy a default into a filter.\n  - company: list of company
+      names exactly as written.\n  - doc_type: list, only if the question names a
+      document type (one of: 10-K, 10-Q, 8-K, contract). Do NOT infer a document type
+      from the topic \u2014 e.g. \"net sales in 2024\" does NOT imply 10-K, so leave
+      doc_type null.\n  - period: list of fiscal years the question states, like \"2024\".
+      If no year is stated, set period to null. Never put \"current\" or a version
+      word in period.\n  - version: \"current\" unless the question explicitly asks
+      for an older or superseded version.\n\n### User:\nCompare Apple and Microsoft
+      revenue in 2024\n\n", "options": {}, "stream": false, "format": {"$defs": {"Filters":
+      {"properties": {"company": {"anyOf": [{"items": {"type": "string"}, "type":
+      "array"}, {"type": "null"}], "title": "Company"}, "doc_type": {"anyOf": [{"items":
+      {"type": "string"}, "type": "array"}, {"type": "null"}], "title": "Doc Type"},
+      "period": {"anyOf": [{"items": {"type": "string"}, "type": "array"}, {"type":
+      "null"}], "title": "Period"}, "version": {"default": "current", "title": "Version",
+      "type": "string"}}, "title": "Filters", "type": "object", "additionalProperties":
+      false, "required": ["company", "doc_type", "period", "version"]}}, "properties":
+      {"query_type": {"enum": ["compare", "other"], "title": "Query Type", "type":
+      "string"}, "rewritten_query": {"title": "Rewritten Query", "type": "string"},
+      "filters": {"$ref": "#/$defs/Filters"}}, "required": ["query_type", "rewritten_query",
+      "filters"], "title": "QueryRewrite", "type": "object", "additionalProperties":
+      false}, "images": []}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '2569'
+      host:
+      - ollama:11434
+      user-agent:
+      - litellm/1.98.0
+    method: POST
+    uri: http://ollama:11434/api/generate
+  response:
+    body:
+      string: '{"model":"qwen2.5:3b-instruct","created_at":"2026-08-25T12:31:07.338589339Z","response":"{\n  \"query_type\":
+        \"compare\",\n  \"rewritten_query\": \"compare Apple and Microsoft revenue
+        in 2024\",\n  \"filters\": {\n    \"company\": [\"Apple\", \"Microsoft\"],\n    \"doc_type\":
+        null,\n    \"period\": [\"2024\"],\n    \"version\": \"current\"\n  }\n}","done":true,"done_reason":"stop","context":[151644,8948,198,2610,525,1207,16948,11,3465,553,54364,14817,13,1446,525,264,10950,17847,13,151645,198,151644,872,198,14374,739,510,2610,18130,264,5896,18883,278,597,594,3405,1119,264,32930,56370,1681,382,5598,510,12,3239,1819,25,330,18948,1,26687,979,279,18237,17064,311,12872,279,83490,8544,476,18266,3941,5248,5110,476,5248,882,18346,320,68,1302,13,330,18948,8162,323,5100,12957,497,330,5158,1521,12957,2297,504,220,17,15,17,17,311,220,17,15,17,19,1827,20094,770,374,330,1575,3263,758,3953,11,13295,3425,1378,9293,7503,476,2432,320,265,98240,701,476,10161,911,264,3175,2197,476,2319,11,374,330,1575,497,4183,330,18948,22956,12,58524,5738,25,264,3175,656,95224,3405,448,894,1795,5239,15057,19673,504,279,10435,13,13655,2813,323,4168,4244,304,279,1467,13,3155,4183,19131,264,12313,476,894,7385,279,3405,1558,537,2669,6644,624,12,13406,25,8649,264,4051,26687,979,279,3405,20975,5302,432,13,1416,279,3405,1558,537,1584,264,4051,11,738,432,311,845,13,14695,23583,11,7942,11,476,2975,264,1638,1119,264,4051,624,220,481,2813,25,1140,315,2813,5036,6896,438,5326,624,220,481,4629,1819,25,1140,11,1172,421,279,3405,5036,264,2197,943,320,603,315,25,220,16,15,15843,11,220,16,15,28242,11,220,23,15843,11,5116,568,3155,4183,23583,264,2197,943,504,279,8544,1959,384,1302,13,330,4711,6625,304,220,17,15,17,19,1,1558,4183,33508,220,16,15,15843,11,773,5274,4629,1819,845,624,220,481,4168,25,1140,315,19743,1635,279,3405,5302,11,1075,330,17,15,17,19,3263,1416,902,1042,374,10982,11,738,4168,311,845,13,14695,2182,330,3231,1,476,264,2319,3409,304,4168,624,220,481,2319,25,330,3231,1,7241,279,3405,20975,17064,369,458,9014,476,51690,29935,2319,382,14374,2657,510,27374,8162,323,5100,12957,304,220,17,15,17,19,271,151645,198,151644,77091,198,515,220,330,1631,1819,788,330,18948,756,220,330,4266,12153,5738,788,330,18948,8162,323,5100,12957,304,220,17,15,17,19,756,220,330,24608,788,341,262,330,10139,788,4383,26567,497,330,12778,8097,262,330,5236,1819,788,845,345,262,330,19304,788,4383,17,15,17,19,8097,262,330,4366,788,330,3231,698,220,456,92],"total_duration":7339797351,"load_duration":1947097,"prompt_eval_count":386,"prompt_eval_duration":575860000,"eval_count":71,"eval_duration":6752591000}'
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Aug 2026 12:31:07 GMT
+      transfer-encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -15,6 +15,8 @@ Progress tracker for building the ingestion pipeline. See [data-ingestion.md](da
 9. **Chunking** — `chunker.py` `MarkdownChunker`: custom code separates tables (kept whole) from prose, then LangChain `MarkdownHeaderTextSplitter` + `RecursiveCharacterTextSplitter` split prose by header then size (~8000 chars / 800 overlap ≈ 2000/200 tokens). `ChunkStore` in `storage.py` writes one JSON file per doc (`{natural_id, chunks}`) + `chunk_manifest.jsonl`, idempotent by natural_id. `chunked_filings` asset (deps on `parsed_filings`). DAG: raw → parsed → chunked. See [chunking-strategy.md](chunking-strategy.md). ✅ Done
 10. **Embedding & vector index** — `embedder.py` `Embedder`: thin LiteLLM `embedding()` wrapper (embed-only, dumb client), provider-agnostic via `EMBEDDING_MODEL` model string + generic api-base env; preserves input order by sorting `response.data` on index. `vector_store.py` `VectorStore`: Chroma `PersistentClient(data/chroma/)`, collection `chunks`, `has_natural_id` idempotency seam, `add_chunks` (id = `natural_id:chunk_index`, flattens `headers` to scalar metadata, records embedding-model name per chunk). `embedded_chunks` asset (deps on `chunked_filings`) walks `chunk_manifest.jsonl`, batch-embeds each un-embedded doc, writes vectors + metadata. Ollama runs as a compose service (`nomic-embed-text`, 768-dim, auto-pulled; Zscaler-proxy CA handled via `Dockerfile.ollama`). DAG: raw → parsed → chunked → embedded. Tests: `test_embedder.py` (unit, mocked provider, order preservation), `test_vector_store.py` (hermetic integration, real ephemeral Chroma). See [embedding-strategy.md](embedding-strategy.md). ✅ Done (415 vectors materialized)
 
+11. **Query rewrite (online path, stage 1)** — `query_rewriter.py` `QueryRewriter`: thin LiteLLM `completion()` wrapper (dumb client), reads `QUERY_REWRITE_MODEL` + `LLM_API_BASE` from env. Takes a question (+ optional session-context string) and returns a validated Pydantic `QueryRewrite` = `{query_type: "compare"|"other", rewritten_query, filters}`; `filters` = company/doc_type/period (optional, list-capable) + version (default `current`). Structured output via `response_format=QueryRewrite`. System prompt enforces explicit-only filter extraction (no inference) and a narrow `compare` definition. Model: `qwen2.5:3b-instruct` via Ollama. New infra: shared `llm-net` network, `infra/ollama/` (owns Ollama + model pulls, both `nomic-embed-text` and the chat model) and `infra/serving/` (online-path stack, own Dockerfile). `infra/ingestion/` left unchanged for now. Test: `test_query_rewriter.py` (VCR cassettes, real LiteLLM→Ollama call recorded once, replays offline). See [query-rewrite-strategy.md](query-rewrite-strategy.md). ✅ Done (single-fact + compare cases verified)
+
 ## What the downloaded files are
 
 ### 1. 10-K Filings
@@ -41,10 +43,11 @@ See [contracts-storyline.md](contracts-storyline.md) for full context, 10-K sect
 
 ## Next session — pick up here
 
-- **Online RAG / query path** — the offline corpus is complete (raw → parsed → chunked → embedded, 415 vectors in Chroma). Next is the query side: embed the question with the same `Embedder`, run a similarity search over the Chroma `chunks` collection, and return the top-k chunks + metadata for answer synthesis. Leave a seam for evaluation.
+- **Online path — query rewrite done.** Next in the sequence: **ingestion metadata** — stamp `company`/`doc_type`/`period`/`version` onto each chunk at embed time, so the company resolver and metadata-filtered retrieval have real fields to work with. Then the **company resolver** (surface form → canonical ticker via a registry built from EDGAR CIK/ticker/name). Then **retrieval** (metadata-filtered similarity search). See [query-rewrite-strategy.md](query-rewrite-strategy.md) for the resolver contract and open items.
+- Prompt tuning: `query_rewriter.py` system prompt is tuned against a few example questions; revisit with a proper labelled set when building filter-extraction eval.
 - Apple CIK/form stay hardcoded for now — generalizing is not needed yet, revisit only when something requires it.
-- Deferred: `Retry-After` header handling on 429s.
-- Housekeeping: delete the throwaway `data/chroma_smoke/` dir; confirm `EMBEDDING_MODEL` + the renamed api-base var are in `.env.example`.
+- Deferred: `Retry-After` header handling on 429s; session-context representation (see strategy doc open items).
+- Housekeeping: delete the throwaway `data/chroma_smoke/` dir; add `EMBEDDING_MODEL` + `EMBEDDING_API_BASE` to `.env.example` (chat-model vars already added).
 
 ## Step 1 — Project skeleton
 

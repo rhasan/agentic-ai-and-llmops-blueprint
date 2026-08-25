@@ -1,0 +1,13 @@
+# Ollama image that trusts a root CA (e.g. Zscaler) if one is present, so it can
+# pull models through a TLS-inspecting proxy. Standard Linux CA-trust flow: drop
+# any *.crt into the system anchors dir, then rebuild the trust bundle. Ollama
+# (Go) reads that bundle, so no env vars are needed.
+#
+# The certs/ dir is gitignored except for .gitkeep, so this COPY always succeeds.
+# On a machine with cert issues, run setup-cert.ps1 first to populate it. On a
+# machine with no proxy, certs/ holds only .gitkeep and the image trusts the
+# normal public roots — builds and works either way.
+FROM ollama/ollama
+
+COPY certs/ /usr/local/share/ca-certificates/corp/
+RUN update-ca-certificates

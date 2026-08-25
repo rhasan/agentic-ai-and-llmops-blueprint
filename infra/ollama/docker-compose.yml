@@ -1,0 +1,34 @@
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    container_name: ollama          # fixed name so other stacks resolve it
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - llm-net
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  ollama-pull:
+    image: ollama/ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["sh", "-c"]
+    command: ["ollama pull nomic-embed-text && ollama pull qwen2.5:3b-instruct"]
+    restart: "no"
+    networks:
+      - llm-net
+
+volumes:
+  ollama_models:
+
+networks:
+  llm-net:
+    external: true

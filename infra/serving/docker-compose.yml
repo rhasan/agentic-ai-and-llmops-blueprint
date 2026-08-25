@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/serving/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../..:/app
+      - /app/.venv
+    env_file:
+      - ../../.env
+    networks:
+      - llm-net
+
+networks:
+  llm-net:
+    external: true
