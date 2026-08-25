@@ -114,8 +114,13 @@ Notes:
   → `10-K`) also need normalization, but those are simpler and separate — not this
   component.
 
-Implementation deferred to the ingestion-metadata task (the registry can't exist until
-chunks are stamped with company ids).
+**Status:** a dummy implementation exists (`company_resolver.py` `CompanyResolver`) — exact
+lookup against a hardcoded Apple registry, returning the contract above (`match_type` always
+`exact`, no alias/fuzzy/`ambiguous` yet). It is called on the rewrite output in
+`pipeline.py` (`QueryPipeline`: rewrite → resolve `filters.company`). The real registry
+(built from ingested EDGAR CIK/ticker/name) and fuzzy matching land with the
+ingestion-metadata task, since the registry can't exist until chunks are stamped with
+company ids.
 
 ## Implementation
 

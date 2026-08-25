@@ -1,0 +1,10 @@
+# Prompts to register into Phoenix. One entry per prompt, keyed by a logical id
+# that the consuming component looks up. Adding a prompt = one entry + one file.
+#   name  - the prompt identifier in Phoenix
+#   label - the tag the app fetches by (source of truth for "which version is live")
+#   file  - the seed text, relative to this directory (bootstrap + runtime fallback)
+
+[query_rewrite]
+name  = "query-rewrite-system"
+label = "production"
+file  = "query_rewrite_system.md"

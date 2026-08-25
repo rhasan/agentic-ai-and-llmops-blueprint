@@ -22,8 +22,8 @@ Build one coherent agentic AI application and the complete lifecycle around it:
 - **Cloud:** Azure, AWS
 - **CI/CD:** GitHub Actions, Docker
 - **Evaluation:** RAGAS, VCR.py, eval-in-CI gates
-- **Observability:** Langfuse, tracing, four monitoring signals
-  (cost, latency, drift, quality)
+- **Observability:** Arize Phoenix (single-container, OpenTelemetry), tracing,
+  four monitoring signals (cost, latency, drift, quality)
 
 ## Quickstart
 
@@ -61,4 +61,8 @@ Claude Code skills bundled with this repo (`.claude/skills/`). Invoke with `/<sk
 
 ## License
 
-TBD
+TBD.
+
+Third-party note: the observability stack uses **Arize Phoenix**, licensed under the
+**Elastic License 2.0 (ELv2)** — free for internal and reference use; may not be offered
+as a competing managed service. See [docs/observability.md](docs/observability.md).

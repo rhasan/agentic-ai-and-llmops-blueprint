@@ -1,0 +1,20 @@
+services:
+  phoenix:
+    image: arizephoenix/phoenix:20.3.0   # pin a real release tag, not `latest`
+    container_name: phoenix          # fixed name so other stacks resolve it
+    ports:
+      - "6006:6006"                  # UI + OTLP HTTP collector
+      - "4317:4317"                  # OTLP gRPC (reserved for tracing later)
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data       # SQLite + data persist here
+    networks:
+      - llm-net
+
+volumes:
+  phoenix_data:
+
+networks:
+  llm-net:
+    external: true

@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "arize-phoenix-client>=3.3.0",
     "beautifulsoup4>=4.15.0",
     "chromadb>=1.5.9",
     "dagster>=1.13.18",
