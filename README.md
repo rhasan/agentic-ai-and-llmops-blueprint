@@ -4,6 +4,14 @@ A production-grade reference implementation of an agentic AI application built
 end-to-end with a full LLMOps stack, demonstrating how to build and operate
 agentic systems in production.
 
+## Use case
+
+To make the patterns concrete, we use this blueprint to build a Q&A tool for
+financial analysts: they ask questions about SEC filings and contracts and get
+short answers that quote the exact source passage. Because a wrong answer carries
+legal cost, it always cites its source, abstains rather than guesses, and logs
+every query for audit.
+
 ## Scope
 
 Build one coherent agentic AI application and the complete lifecycle around it:
