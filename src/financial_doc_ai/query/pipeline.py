@@ -8,8 +8,8 @@ retrieve -> generate -> grounding -> audit path later.
 
 from pydantic import BaseModel
 
-from financial_doc_ai.company_resolver import CompanyResolver, Resolution
-from financial_doc_ai.query_rewriter import QueryRewrite, QueryRewriter
+from financial_doc_ai.query.resolver import CompanyResolver, Resolution
+from financial_doc_ai.query.rewriter import QueryRewrite, QueryRewriter
 
 
 class ResolvedQuery(BaseModel):

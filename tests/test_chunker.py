@@ -1,4 +1,4 @@
-from financial_doc_ai.chunker import MarkdownChunker
+from financial_doc_ai.ingestion.chunker import MarkdownChunker
 
 
 def test_table_kept_whole():

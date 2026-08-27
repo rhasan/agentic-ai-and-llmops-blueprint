@@ -1,5 +1,7 @@
 from typing import Literal
+
 from pydantic import BaseModel
+
 
 class Filters(BaseModel):
     company: list[str] | None = None
@@ -13,9 +15,11 @@ class QueryRewrite(BaseModel):
     filters: Filters
 
 import os
+
 import litellm
 
-from financial_doc_ai.prompts import fetch_system_prompt
+from financial_doc_ai.prompts.registry import fetch_system_prompt
+
 
 class QueryRewriter:
     def __init__(

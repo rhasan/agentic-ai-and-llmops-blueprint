@@ -1,0 +1,6 @@
+# Which companies/forms the ingestion pipeline pulls from EDGAR.
+# This is the only hand-maintained list — add a ticker to ingest a new company.
+# CIK and canonical name are looked up from the EDGAR company registry
+# (data/reference/company_tickers.json), never hardcoded here.
+tickers = ["AAPL"]
+forms   = ["10-K"]

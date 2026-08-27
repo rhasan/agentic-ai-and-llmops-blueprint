@@ -13,7 +13,7 @@ import os
 from phoenix.client import Client
 from phoenix.client.types import PromptVersion
 
-from financial_doc_ai.prompts import SEED_DIR, load_manifest
+from financial_doc_ai.prompts.registry import SEED_DIR, load_manifest
 
 logger = logging.getLogger(__name__)
 

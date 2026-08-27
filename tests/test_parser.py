@@ -1,4 +1,5 @@
-from financial_doc_ai.parser import FilingParser
+from financial_doc_ai.ingestion.parser import FilingParser
+
 
 def test_filing_parser_removes_styles_and_scripts():
     html = b"""

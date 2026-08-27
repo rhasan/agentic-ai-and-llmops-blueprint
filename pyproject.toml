@@ -35,4 +35,4 @@ dev = [
 ]
 
 [tool.dagster]
-module_name = "financial_doc_ai.definitions"
+module_name = "financial_doc_ai.ingestion.definitions"

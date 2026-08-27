@@ -27,7 +27,11 @@ class VectorStore:
         chunks: list[dict],
         embeddings: list[list[float]],
         embedding_model: str,
+        filter_metadata: dict | None = None,
     ) -> None:
+        # Retrieval filter fields (company/doc_type/period/version), same for
+        # every chunk of a document. All scalars, so Chroma-safe.
+        filter_metadata = filter_metadata or {}
         ids, metadatas = [], []
         for chunk in chunks:
             # Deterministic id: same doc+position => same id, so a re-add would
@@ -40,6 +44,7 @@ class VectorStore:
                 "chunk_index": chunk["chunk_index"],
                 "is_table": chunk["is_table"],
                 "embedding_model": embedding_model,
+                **filter_metadata,
             }
             # Chroma metadata values must be scalars (no dicts/None). Flatten the
             # header map, keeping only the levels that are present.

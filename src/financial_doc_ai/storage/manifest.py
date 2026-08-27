@@ -1,5 +1,6 @@
-from dataclasses import dataclass, asdict, field
 import json
+from dataclasses import asdict, dataclass, field
+
 
 @dataclass(frozen=True)
 class ManifestRecord:

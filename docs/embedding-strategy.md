@@ -44,12 +44,12 @@ model into the volume (one time); later runs are instant.
 
 ## Code
 
-1. **`src/financial_doc_ai/embedder.py`** — `Embedder`, a thin wrapper over LiteLLM
+1. **`src/financial_doc_ai/ingestion/embedder.py`** — `Embedder`, a thin wrapper over LiteLLM
    `embedding()`. Reads `EMBEDDING_MODEL` + api base from env; exposes
    `embed(texts: list[str]) -> list[list[float]]`. Sorts `response.data` by index so
    output order matches input. Embed-only, no storage — same dumb-client principle as
    `edgar.py`.
-2. **`src/financial_doc_ai/vector_store.py`** — `VectorStore`, a wrapper around a Chroma
+2. **`src/financial_doc_ai/storage/vector_store.py`** — `VectorStore`, a wrapper around a Chroma
    collection (`chunks`) persisted to `data/chroma/`. `add_chunks` (id =
    `natural_id:chunk_index`, flattens `headers` into scalar metadata, records the
    embedding-model name per chunk) and `has_natural_id` for idempotency. Thin seam so

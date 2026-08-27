@@ -1,6 +1,7 @@
 import vcr
+
 from financial_doc_ai.prompts import SEED_DIR, load_manifest
-from financial_doc_ai.query_rewriter import QueryRewriter
+from financial_doc_ai.query.rewriter import QueryRewriter
 
 # Record the real LiteLLM -> Ollama call once, then replay offline.
 # Model output is frozen into the cassette, so assertions are deterministic.

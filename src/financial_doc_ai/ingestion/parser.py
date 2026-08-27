@@ -1,6 +1,8 @@
 import re
-from bs4 import BeautifulSoup
+
 import markdownify
+from bs4 import BeautifulSoup
+
 
 class FilingParser:
     """Parses 10-K HTML filings to extract text and tables as clean Markdown."""

@@ -1,8 +1,8 @@
 """Prompt-registry access: manifest paths, manifest loading, and live-prompt fetch.
 
 The single place that knows where the seed prompts live and how to read a prompt
-from Phoenix. ``seed_prompts.py`` writes to the registry; components (e.g.
-``query_rewriter.py``) read from it via ``fetch_system_prompt``.
+from Phoenix. ``prompts.seed`` writes to the registry; components (e.g.
+``query.rewriter``) read from it via ``fetch_system_prompt``.
 """
 
 import logging
@@ -15,7 +15,7 @@ from phoenix.client import Client
 logger = logging.getLogger(__name__)
 
 # repo-root/seed/prompts/ — resolved from this file, not the working directory.
-SEED_DIR = Path(__file__).resolve().parents[2] / "seed" / "prompts"
+SEED_DIR = Path(__file__).resolve().parents[3] / "seed" / "prompts"
 MANIFEST = SEED_DIR / "manifest.toml"
 
 

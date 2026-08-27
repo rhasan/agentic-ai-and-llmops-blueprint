@@ -114,17 +114,20 @@ Notes:
   → `10-K`) also need normalization, but those are simpler and separate — not this
   component.
 
-**Status:** a dummy implementation exists (`company_resolver.py` `CompanyResolver`) — exact
+**Status:** a dummy implementation exists (`query/resolver.py` `CompanyResolver`) — exact
 lookup against a hardcoded Apple registry, returning the contract above (`match_type` always
 `exact`, no alias/fuzzy/`ambiguous` yet). It is called on the rewrite output in
-`pipeline.py` (`QueryPipeline`: rewrite → resolve `filters.company`). The real registry
-(built from ingested EDGAR CIK/ticker/name) and fuzzy matching land with the
-ingestion-metadata task, since the registry can't exist until chunks are stamped with
-company ids.
+`pipeline.py` (`QueryPipeline`: rewrite → resolve `filters.company`).
+
+The registry data now exists: the ingestion-metadata step fetches SEC's
+`company_tickers.json` into `data/reference/company_tickers.json` (`CompanyRegistry`,
+cik↔ticker↔name), and chunks are stamped with the canonical `company` ticker. The
+remaining work is to point the resolver at that registry and add alias/fuzzy matching +
+`ambiguous` outcomes, replacing the hardcoded Apple dict.
 
 ## Implementation
 
-- **Code:** `src/financial_doc_ai/query_rewriter.py` — `QueryRewriter`, a thin LiteLLM
+- **Code:** `src/financial_doc_ai/query/rewriter.py` — `QueryRewriter`, a thin LiteLLM
   `completion()` wrapper (dumb client). Output typed as Pydantic `QueryRewrite` (+ nested
   `Filters`); filled via `response_format=QueryRewrite`. System prompt enforces
   explicit-only filter extraction and the narrow `compare` definition.
@@ -144,6 +147,7 @@ company ids.
 - **Session context handling** — how a session is represented, how many turns are kept,
   and whether/how older turns are compacted. The design says session context is an input
   but never specifies the mechanism. Deferred.
-- **Ingestion metadata** — chunks do not yet store company/doc_type/period/version. Adding
-  them is a later build step (needed before the resolver and metadata-filtered retrieval
-  can work). Not part of the current query-rewrite task.
+- **Ingestion metadata** — ✅ done. Chunks are stamped with `company`/`doc_type`/`period`/
+  `version` at embed time (`metadata.py` `chunk_filter_fields`), driven by
+  `config/companies.toml` + `CompanyRegistry`. Unblocks the real resolver and
+  metadata-filtered retrieval.

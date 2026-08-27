@@ -38,7 +38,7 @@ Prompts are versioned in Phoenix and fetched at runtime by label.
 |---|---|
 | `seed/prompts/manifest.toml` | Declares each prompt: logical key → `name`, `label`, `file`. Adding a prompt = one entry + one `.md`. |
 | `seed/prompts/*.md` | Canonical seed text. Bootstrap for a fresh Phoenix and the runtime fallback. |
-| `seed_prompts.py` | Idempotent, manifest-driven: registers each prompt if absent, tags the version with its label. |
+| `prompts/seed.py` | Idempotent, manifest-driven: registers each prompt if absent, tags the version with its label. |
 | `prompts.py` | Registry access: `load_manifest()`, `fetch_system_prompt(key)` (fetch the version at the label; fall back to the seed file if Phoenix is unreachable). |
 | consumer (`QueryRewriter`) | Fetches its prompt at init and caches it. `system_prompt` injection seam lets tests skip Phoenix. |
 

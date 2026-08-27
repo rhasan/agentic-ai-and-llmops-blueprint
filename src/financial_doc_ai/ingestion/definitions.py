@@ -1,16 +1,21 @@
-import os
 import json
-from datetime import datetime, timezone
+import os
+import tomllib
+from datetime import UTC, datetime
 from pathlib import Path
 
 import dagster as dg
 
-from financial_doc_ai.edgar import EdgarClient
-from financial_doc_ai.storage import RawStore, ParsedStore, ChunkStore
-from financial_doc_ai.parser import FilingParser
-from financial_doc_ai.chunker import MarkdownChunker
-from financial_doc_ai.embedder import Embedder
-from financial_doc_ai.vector_store import VectorStore
+from financial_doc_ai.company_registry import CompanyRegistry
+from financial_doc_ai.ingestion.chunker import MarkdownChunker
+from financial_doc_ai.ingestion.edgar import EdgarClient
+from financial_doc_ai.ingestion.embedder import Embedder
+from financial_doc_ai.ingestion.metadata import chunk_filter_fields
+from financial_doc_ai.ingestion.parser import FilingParser
+from financial_doc_ai.storage import ChunkStore, ParsedStore, RawStore, VectorStore
+
+CONFIG_PATH = Path("/app/config/companies.toml")
+REGISTRY_PATH = Path("/app/data/reference/company_tickers.json")
 
 
 
@@ -18,31 +23,51 @@ from financial_doc_ai.vector_store import VectorStore
 def raw_filings(context: dg.AssetExecutionContext) -> None:
     """Download recent filings and store them.
 
-    Ties the client and store together: gets the list of recent filings
-    (currently 3 Apple 10-Ks), downloads each one, and hands the bytes to
-    RawStore to save and record. Duplicates are skipped by content hash.
+    Driven by config/companies.toml (which tickers/forms to pull). Refreshes the
+    EDGAR company registry, resolves each configured ticker to its CIK + canonical
+    name, downloads each filing, and hands the bytes to RawStore. The canonical
+    ticker/name and fiscal period_date are stamped into source_metadata so the
+    retrieval filter fields can be derived downstream. Duplicates skipped by hash.
     """
     client = EdgarClient(user_agent=os.environ["EDGAR_USER_AGENT"])
     store = RawStore(Path("/app/data"))
 
-    cik, form = 320193, "10-K"  # Apple, hardcoded for first slice
-    filings = client.recent_filings(cik=cik, form=form, limit=3)
-    context.log.info(f"found {len(filings)} {form} filings for CIK {cik}")
+    config = tomllib.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    tickers, forms = config["tickers"], config["forms"]
 
-    for f in filings:
-        data = client.fetch_document(cik, f["accession"], f["primary_doc"])
+    # Reference registry: fetch once (latest-wins), then look CIKs up locally.
+    CompanyRegistry.refresh(client, REGISTRY_PATH, log=context.log.info)
+    registry = CompanyRegistry(REGISTRY_PATH)
 
-        rec = store.put(
-            data=data,
-            source="edgar",
-            natural_id=f["accession"],
-            fetched_at=datetime.now(timezone.utc).isoformat(),
-            source_metadata={
-                "cik": cik, "form": form, "filing_date": f["filing_date"],
-                "primary_doc": f["primary_doc"]
-            },
-        )
-        context.log.info(f"{'stored' if rec else 'skipped (dup)'}: {f['accession']}")
+    for ticker in tickers:
+        cik = registry.cik_for(ticker)
+        if cik is None:
+            context.log.warning(f"ticker {ticker} not in EDGAR registry; skipping")
+            continue
+        company_name = registry.name_for(cik)
+
+        for form in forms:
+            filings = client.recent_filings(cik=cik, form=form, limit=3)
+            context.log.info(f"found {len(filings)} {form} filings for {ticker} (CIK {cik})")
+
+            for f in filings:
+                data = client.fetch_document(cik, f["accession"], f["primary_doc"])
+                rec = store.put(
+                    data=data,
+                    source="edgar",
+                    natural_id=f["accession"],
+                    fetched_at=datetime.now(UTC).isoformat(),
+                    source_metadata={
+                        "cik": cik,
+                        "ticker": ticker,
+                        "company_name": company_name,
+                        "form": form,
+                        "filing_date": f["filing_date"],
+                        "report_date": f["report_date"],
+                        "primary_doc": f["primary_doc"],
+                    },
+                )
+                context.log.info(f"{'stored' if rec else 'skipped (dup)'}: {f['accession']}")
 
 
 @dg.asset(deps=[raw_filings])
@@ -81,7 +106,7 @@ def parsed_filings(context: dg.AssetExecutionContext) -> None:
                 text=md_text,
                 source=rec["source"],
                 natural_id=rec["natural_id"],
-                fetched_at=datetime.now(timezone.utc).isoformat(),
+                fetched_at=datetime.now(UTC).isoformat(),
                 source_metadata=rec.get("source_metadata", {})
             )
             context.log.info(f"Successfully parsed and stored: {rec['natural_id']}")
@@ -113,14 +138,18 @@ def chunked_filings(context: dg.AssetExecutionContext) -> None:
               context.log.warning(f"Parsed file missing for {rec['natural_id']}")
               continue
 
-          # Read the Markdown, split it into chunks, and store them.
+          # Read the Markdown, split it into chunks, and store them. Derive the
+          # document-level filter fields here (single derivation point) and stash
+          # them in the chunk file so it is self-describing.
           md = parsed_path.read_text(encoding="utf-8")
           chunks = chunker.chunk(md)
+          filter_metadata = chunk_filter_fields(rec["source_metadata"])
           chunk_store.put(
               chunks=chunks, source=rec["source"],
               natural_id=rec["natural_id"],
-              fetched_at=datetime.now(timezone.utc).isoformat(),
+              fetched_at=datetime.now(UTC).isoformat(),
               source_metadata=rec.get("source_metadata", {}),
+              metadata=filter_metadata,
           )
           context.log.info(f"Chunked {rec['natural_id']}: {len(chunks)} chunks")
 
@@ -153,13 +182,18 @@ def embedded_chunks(context: dg.AssetExecutionContext) -> None:
                 continue
 
             # Load the chunks, embed their text, store vectors + metadata.
-            chunks = json.loads(chunk_path.read_text(encoding="utf-8"))["chunks"]
+            payload = json.loads(chunk_path.read_text(encoding="utf-8"))
+            chunks = payload["chunks"]
             embeddings = embedder.embed([c["text"] for c in chunks])
+            # The chunk file already carries the document-level filter fields
+            # (company/doc_type/period/version); stamp them onto every vector so
+            # retrieval can filter on real metadata.
             vector_store.add_chunks(
                 natural_id=rec["natural_id"],
                 chunks=chunks,
                 embeddings=embeddings,
                 embedding_model=embedder.model,
+                filter_metadata=payload.get("metadata", {}),
             )
             context.log.info(f"Embedded {rec['natural_id']}: {len(chunks)} chunks")
 

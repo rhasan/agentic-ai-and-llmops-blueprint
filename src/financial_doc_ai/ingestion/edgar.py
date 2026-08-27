@@ -1,9 +1,13 @@
 import time
+
 import httpx
 from tenacity import (
-    retry, stop_after_attempt, wait_exponential,
-    retry_if_exception_type
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
 )
+
 
 class RetryableError(Exception):
     """A transient failure worth retrying (429 / 5xx)."""
@@ -19,6 +23,7 @@ class EdgarClient:
 
     SUBMISSIONS = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
     DOC = "https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/{doc}"
+    COMPANY_TICKERS = "https://www.sec.gov/files/company_tickers.json"
 
     def __init__(self, user_agent: str, min_interval: float = 0.15, transport=None):
         self._client = httpx.Client(headers={"User-Agent": user_agent}, timeout=30.0, transport=transport)
@@ -53,8 +58,9 @@ class EdgarClient:
 
         Asks EDGAR for the company's filing list, keeps only the given form
         (e.g. "10-K"), and returns up to `limit` of the most recent ones.
-        Returns small dicts (accession, form, filing_date, primary_doc) — the
-        list only, not the file contents.
+        Returns small dicts (accession, form, filing_date, report_date,
+        primary_doc) — the list only, not the file contents. `report_date` is
+        the fiscal-period end (used to derive the fiscal year for filtering).
         """
         r = self._get(self.SUBMISSIONS.format(cik=cik))
         recent = r.json()["filings"]["recent"]
@@ -67,6 +73,7 @@ class EdgarClient:
                         "accession": recent["accessionNumber"][i],
                         "form": f,
                         "filing_date": recent["filingDate"][i],
+                        "report_date": recent["reportDate"][i],
                         "primary_doc": recent["primaryDocument"][i],
                     }
                 )
@@ -82,4 +89,12 @@ class EdgarClient:
         """
         acc = accession.replace("-","")
         r = self._get(self.DOC.format(cik=cik, acc=acc, doc=primary_doc))
+        return r.content
+
+    def fetch_company_tickers(self) -> bytes:
+        """Download SEC's full cik<->ticker<->name registry (company_tickers.json).
+
+        Fetch only — CompanyRegistry owns writing/parsing it (dumb client).
+        """
+        r = self._get(self.COMPANY_TICKERS)
         return r.content

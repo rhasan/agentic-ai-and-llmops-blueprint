@@ -23,14 +23,29 @@ A **blueprint / reference implementation** demonstrating production-grade patter
 
 ## Stack & layout
 
-- **Package:** `src/financial_doc_ai/` (uv, Python 3.12).
+- **Package:** `src/financial_doc_ai/` (uv, Python 3.12), grouped by subsystem to mirror the infra stacks:
+  - `ingestion/` — offline batch path (Dagster `definitions.py`, `edgar`, `parser`, `chunker`, `embedder`, `metadata`).
+  - `query/` — online path (`pipeline`, `rewriter`, `resolver`; retriever/generator/api land here).
+  - `storage/` — persistence shared by both (`stores.py` = Raw/Parsed/Chunk stores, `manifest`, `vector_store`; `__init__` re-exports the public names).
+  - `prompts/` — Phoenix registry access (`registry`) + seeding (`seed`).
+  - `company_registry.py` — top-level, shared (built offline, read by the resolver).
 - **Orchestrator:** Dagster (offline/batch ingestion pipeline). Runs only inside the container.
-- **Execution path:** everything runs in Docker (dev == deploy). Compose stack per subsystem under `infra/<stack>/` — currently `infra/ingestion/`.
-  - Run: `docker compose -f infra/ingestion/docker-compose.yml up --build` → Dagster UI at `http://localhost:3000`.
+- **Execution path:** everything runs in Docker (dev == deploy). One compose stack per subsystem under `infra/<stack>/`:
+  - `infra/ingestion/` — Dagster batch pipeline (`up --build` → UI at `http://localhost:3000`). Has its own Ollama (embed model only).
+  - `infra/ollama/` — shared Ollama + model pulls (`nomic-embed-text` + `qwen2.5:3b-instruct`); `infra/serving/` — online query path; `infra/observability/` — Phoenix (prompt registry + tracing). These share the external `llm-net` network.
 - **Storage:** local FS now (`data/`, gitignored), JSONL manifest; migrate to cloud (Blob) + SQLite/DB later via the storage seam.
 
 ## Conventions
 
-- Storage goes through `RawStore` (`src/financial_doc_ai/storage.py`): content-addressed raw bytes + append-only JSONL manifest; idempotent by content hash; never overwrite (old versions are audit evidence).
-- External clients (e.g. `edgar.py`) stay "dumb" — fetch only, no storage logic. Storage lives in `RawStore`.
+- Storage goes through `RawStore` (`src/financial_doc_ai/storage/`): content-addressed raw bytes + append-only JSONL manifest; idempotent by content hash; never overwrite (old versions are audit evidence).
+- External clients (e.g. `edgar.py`) stay "dumb" — fetch only, no storage logic. Storage lives in the store classes.
+- **Config vs derived reference data:** hand-maintained inputs go in git-tracked `config/` (e.g. `config/companies.toml` = what to ingest); data fetched at runtime goes in gitignored `data/reference/` (e.g. `company_tickers.json`, latest-wins overwrite with a sha256 change-check). Don't hardcode lookups that belong in config.
 - `EDGAR_USER_AGENT` comes from `.env` (see `.env.example`), injected into the container by compose.
+
+## Testing
+
+- **VCR.py for all external I/O — no mocking or faking.** Any test that calls an external API/system and uses the output records the real interaction once (`record_mode="once"`) and replays offline. Recording real payloads exercises the logic against realistic shapes and catches API drift; hand-written fixtures silently diverge.
+  - Record cassettes **in-container**, where SEC/Ollama are reachable (local host is Zscaler-proxied): `docker compose -f infra/<stack>/docker-compose.yml exec -T app uv run pytest <tests>`. For online-path tests hitting `http://ollama:11434`, use the `llm-net` serving stack (`docker compose -f infra/serving/docker-compose.yml run --rm --no-deps -T app uv run pytest ...`). Cassettes bind-mount to `tests/cassettes/` and replay offline.
+  - Pre-seeding on-disk state (e.g. a stale cached file to trigger an update path) is plain test setup, not mocking.
+  - `allow_playback_repeats=True` is a `use_cassette(...)` arg, not a `VCR()` constructor arg — needed when one test hits a URI twice.
+  - **Only** exception: conditions a recording physically can't reproduce — failure injection (retry on 429/5xx, transport errors) and deliberately malformed/out-of-order responses. Keep the mock minimal and comment *why* it can't be VCR.

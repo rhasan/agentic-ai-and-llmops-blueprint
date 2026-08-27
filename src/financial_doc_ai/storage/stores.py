@@ -2,8 +2,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from financial_doc_ai.storage.manifest import ManifestRecord
 
-from financial_doc_ai.manifest import ManifestRecord
 
 class RawStore:
     def __init__(self, root:Path):
@@ -114,15 +114,20 @@ class ChunkStore:
         natural_id: str,
         fetched_at: str,
         source_metadata: dict,
+        metadata: dict | None = None,
     ) -> ManifestRecord | None:
         # Idempotency: skip if this document has already been chunked.
         if self.has_natural_id(natural_id):
             return None
 
         # Write all chunks of this document into one JSON file. The chunks are
-        # only meaningful together, so we don't split them across files.
+        # only meaningful together, so we don't split them across files. A
+        # document-level `metadata` block (the retrieval filter fields, identical
+        # for every chunk) makes the file self-describing; chunk-level attributes
+        # (headers/is_table/chunk_index) stay on each chunk.
         payload = json.dumps(
-            {"natural_id": natural_id, "chunks": chunks}, ensure_ascii=False
+            {"natural_id": natural_id, "metadata": metadata or {}, "chunks": chunks},
+            ensure_ascii=False,
         )
         # Name the file by the hash of its contents, same as the other stores.
         h = hashlib.sha256(payload.encode("utf-8")).hexdigest()

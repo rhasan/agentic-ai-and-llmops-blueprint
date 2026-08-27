@@ -1,4 +1,4 @@
-from financial_doc_ai.company_resolver import CompanyResolver
+from financial_doc_ai.query.resolver import CompanyResolver
 
 
 def test_resolve_known_forms():

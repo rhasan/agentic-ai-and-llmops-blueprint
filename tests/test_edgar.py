@@ -1,5 +1,6 @@
 import vcr
-from financial_doc_ai.edgar import EdgarClient
+
+from financial_doc_ai.ingestion.edgar import EdgarClient
 
 # VCR config: where cassettes live, and record once then replay
 my_vcr = vcr.VCR(
@@ -21,6 +22,7 @@ def test_recent_filings():
         assert f["form"] == "10-K"
         assert f["accession"]
         assert f["primary_doc"]
+        assert f["report_date"]  # fiscal-period end, e.g. "2024-09-28"
 
 @my_vcr.use_cassette("fetch_document.yaml")
 def test_fetch_document():
@@ -31,3 +33,10 @@ def test_fetch_document():
     data = client.fetch_document(APPLE_CIK, f["accession"], f["primary_doc"])
     assert len(data) > 0
     assert b"<html" in data[:2000].lower()
+
+
+@my_vcr.use_cassette("company_tickers.yaml")
+def test_fetch_company_tickers():
+    client = EdgarClient(user_agent="test-agent test@example.com")
+    data = client.fetch_company_tickers()
+    assert b"AAPL" in data

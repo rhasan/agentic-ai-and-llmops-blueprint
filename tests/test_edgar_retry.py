@@ -1,6 +1,7 @@
 import httpx
 from tenacity import wait_none
-from financial_doc_ai.edgar import EdgarClient, RetryableError
+
+from financial_doc_ai.ingestion.edgar import EdgarClient, RetryableError
 
 
 def test_retries_on_429_then_succeeds():

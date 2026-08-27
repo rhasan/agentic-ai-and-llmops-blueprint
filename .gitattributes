@@ -1,0 +1,4 @@
+# VCR cassettes carry base64 (!!binary) response bodies. Treat them as binary so
+# git never applies EOL conversion, which would corrupt those bodies on checkout
+# (notably LF->CRLF on Windows). Store and check out the recorded bytes verbatim.
+tests/cassettes/** -text
