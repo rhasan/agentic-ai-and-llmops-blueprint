@@ -37,3 +37,6 @@ data/
 
 # Agents
 .agents/
+
+# other dot files
+.ruff_cache
