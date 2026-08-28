@@ -47,15 +47,29 @@ Always surface the filters; require an explicit confirm when signals are weak
 
 ## Entry point (no web UI yet)
 
-A thin FastAPI in the serving stack (its Dockerfile already targets
-`financial_doc_ai.api:app`) with two endpoints — `POST /interpret`, `POST /answer` —
-enough to exercise the flow. A browser UI is later polish, low priority.
+A thin FastAPI in the serving stack (`financial_doc_ai.serving.api:app`) with two
+endpoints — `POST /interpret`, `POST /answer` — enough to exercise the flow. A
+browser UI is later polish, low priority.
 
-## Next build (concrete)
+## Async: the online path is async end to end
 
-1. `search_filings` **MCP server** wrapping `VectorStore` (+ query embedding).
-2. Minimal **orchestrator** (MCP client) doing interpret → gate → search → (answer).
-3. Thin **FastAPI** entry point exposing the two-call flow.
+`interpret` and `answer` both wait on slow calls — `interpret` on the query-rewrite
+LLM, `answer` on the retrieval MCP tool. Under many concurrent users those waits
+would exhaust FastAPI's capped sync threadpool and queue requests, so the whole
+path is `async` (rewriter → pipeline → orchestrator → routes) and the worker is
+free to serve others during each wait. The company resolver stays sync — a fast
+in-memory lookup, called without `await`; make it async only if it grows a slow
+step. Rationale and the plain-language version: [async-vs-sync.md](async-vs-sync.md).
 
-Deferred: company resolver upgrade (low priority), generation + grounding + audit
-log, ground-truth figures MCP tool, durable HITL state, web UI.
+## Build status
+
+1. ✅ `search_filings` **MCP server** wrapping `VectorStore` (+ query embedding).
+2. ✅ Minimal **orchestrator** (MCP client) doing interpret → gate → search.
+3. ✅ Thin **FastAPI** entry point exposing the two-call flow (async).
+
+Next: **generation + grounding + audit log** (draft with citations → grounding
+check: LLM grader + exact-match for numbers, pass→return / fail→abstain → immutable
+audit write).
+
+Deferred: company resolver upgrade (low priority), ground-truth figures MCP tool,
+durable HITL state, web UI.

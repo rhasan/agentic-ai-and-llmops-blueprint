@@ -13,6 +13,27 @@ Since our documents have been parsed into clean Markdown, we can use the Markdow
 1. **Keep Tables Whole:** We identify Markdown table boundaries (which typically start and end with blank lines) and ensure the entire table remains together in a single chunk.
 2. **Chunk by Headers & Paragraphs:** For standard text, we split along natural structural lines—such as Markdown headers (`#`, `##`) or paragraph breaks (`\n\n`)—rather than cutting a sentence in half.
 
+## Denoising before chunking: running headers/footers
+
+Before chunking, the parser strips **page furniture** — running headers/footers
+that print on every page (e.g. `Apple Inc. | 2024 Form 10-K | 57`). These survive
+HTML extraction as noise, and because 10-K financial sections are wall-to-wall
+tables, a lone footer line sandwiched between two tables gets isolated as its own
+one-line chunk. Left in, those junk chunks surface as top retrieval hits and starve
+generation of real content.
+
+The rule is **frequency, not position or length**: a line whose *normalized* form
+(digits collapsed, whitespace squeezed — so `... | 57` and `... | 58` match)
+recurs across many pages is furniture and is dropped; a line that appears once is
+content and is kept. This is what protects footnotes — they are load-bearing in
+financial docs (`(1) Excludes $2.3B restructuring charge`) and never repeat, so
+they are never flagged. Normalization is only a comparison key: kept lines,
+including their numbers, are written verbatim. Blank and table lines are never
+touched. See `FilingParser._strip_repeated_lines`.
+
+This cleanup is format-agnostic — it runs on the extracted Markdown, so a future
+PDF extractor feeds the same step (see [work-in-progress.md](work-in-progress.md)).
+
 ### What if a table exceeds the context window?
 Modern embedding models and LLMs have very large context windows, so a single Markdown table almost always fits easily within a single chunk (e.g., 2000 tokens).
 
