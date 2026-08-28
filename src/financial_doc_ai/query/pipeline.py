@@ -26,7 +26,9 @@ class QueryPipeline:
         self.rewriter = rewriter if rewriter is not None else QueryRewriter()
         self.resolver = resolver if resolver is not None else CompanyResolver()
 
-    def run(self, question: str, session_context: str | None = None) -> ResolvedQuery:
-        rewrite = self.rewriter.rewrite(question, session_context)
+    async def run(self, question: str, session_context: str | None = None) -> ResolvedQuery:
+        rewrite = await self.rewriter.rewrite(question, session_context)
+        # Resolver is a fast in-memory lookup — call it directly (no await). If it
+        # ever grows a slow/LLM step, make resolve() async and await it here too.
         companies = self.resolver.resolve(rewrite.filters.company or [])
         return ResolvedQuery(rewrite=rewrite, companies=companies)

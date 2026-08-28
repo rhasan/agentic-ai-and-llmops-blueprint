@@ -1,3 +1,5 @@
+import asyncio
+
 import vcr
 
 from financial_doc_ai.prompts import SEED_DIR, load_manifest
@@ -29,7 +31,7 @@ def _pipeline() -> QueryPipeline:
 
 @my_vcr.use_cassette("query_rewrite_single.yaml")
 def test_run_resolves_extracted_companies():
-    result = _pipeline().run("What was Apple net sales in 2024?")
+    result = asyncio.run(_pipeline().run("What was Apple net sales in 2024?"))
 
     assert result.rewrite.filters.company == ["Apple"]
     assert [c.outcome for c in result.companies] == ["resolved"]
@@ -38,7 +40,7 @@ def test_run_resolves_extracted_companies():
 
 @my_vcr.use_cassette("pipeline_no_company.yaml")
 def test_run_with_no_company_filter_resolves_nothing():
-    result = _pipeline().run("What are the main risk factors?")
+    result = asyncio.run(_pipeline().run("What are the main risk factors?"))
 
     assert result.rewrite.filters.company is None
     assert result.companies == []

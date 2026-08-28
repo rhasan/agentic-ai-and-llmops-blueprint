@@ -18,7 +18,7 @@ class _FakeOrchestrator:
     def __init__(self):
         self.answer_calls = []
 
-    def interpret(self, question, session_context=None):
+    async def interpret(self, question, session_context=None):
         return Interpretation(
             query_type="other",
             rewritten_query=question,

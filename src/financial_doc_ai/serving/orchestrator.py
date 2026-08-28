@@ -65,8 +65,10 @@ class Orchestrator:
         # require SEARCH_MCP_URL; the default client is built lazily in `answer`.
         self.search_client = search_client
 
-    def interpret(self, question: str, session_context: str | None = None) -> Interpretation:
-        resolved = self.pipeline.run(question, session_context)
+    async def interpret(self, question: str, session_context: str | None = None) -> Interpretation:
+        # Async because the pipeline's rewrite step is a live LLM call — see
+        # docs/async-vs-sync.md for why the online path is async end to end.
+        resolved = await self.pipeline.run(question, session_context)
         needs, reasons = _needs_confirmation(resolved)
         # Show canonical tickers in the proposed filters — the corpus is stamped
         # with tickers (company=AAPL), so retrieval needs the resolved value, not

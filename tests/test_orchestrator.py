@@ -79,7 +79,7 @@ class _StubPipeline:
         self._resolved = resolved
         self.calls = []
 
-    def run(self, question, session_context=None):
+    async def run(self, question, session_context=None):
         self.calls.append((question, session_context))
         return self._resolved
 
@@ -91,7 +91,7 @@ def test_interpret_substitutes_resolved_ticker():
     resolved = _resolved(companies=[_res("Apple", "resolved", _AAPL)], filters=filters)
     orch = Orchestrator(pipeline=_StubPipeline(resolved))
 
-    interp = orch.interpret("How did Apple do?")
+    interp = asyncio.run(orch.interpret("How did Apple do?"))
     assert interp.proposed_filters.company == ["AAPL"]
     assert interp.proposed_filters.doc_type == ["10-K"]
     assert interp.needs_confirmation is False
@@ -106,7 +106,7 @@ def test_interpret_keeps_surface_form_when_unresolved():
     resolved = _resolved(companies=[_res("Acme", "not_found")], filters=filters)
     orch = Orchestrator(pipeline=_StubPipeline(resolved))
 
-    interp = orch.interpret("How did Acme do?")
+    interp = asyncio.run(orch.interpret("How did Acme do?"))
     assert interp.proposed_filters.company == ["Acme"]
     assert interp.needs_confirmation is True
 
@@ -115,7 +115,7 @@ def test_interpret_no_company_stays_none():
     resolved = _resolved(filters=Filters(doc_type=["10-K"]))
     orch = Orchestrator(pipeline=_StubPipeline(resolved))
 
-    interp = orch.interpret("What are the risk factors?")
+    interp = asyncio.run(orch.interpret("What are the risk factors?"))
     assert interp.proposed_filters.company is None
     assert interp.needs_confirmation is False
 

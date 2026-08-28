@@ -35,13 +35,15 @@ class QueryRewriter:
             system_prompt if system_prompt is not None else fetch_system_prompt(prompt_key)
         )
 
-    def rewrite(self, question: str, session_context: str | None = None) -> QueryRewrite:
+    async def rewrite(self, question: str, session_context: str | None = None) -> QueryRewrite:
         messages = [{"role": "system", "content": self.system_prompt}]
         if session_context:
             messages.append({"role": "user", "content": f"Conversation so far:\n{session_context}"})
         messages.append({"role": "user", "content": question})
 
-        response = litellm.completion(
+        # Async LLM call: the online path serves many users and this wait is slow
+        # (seconds), so the worker must be free to serve other requests meanwhile.
+        response = await litellm.acompletion(
             model=self.model,
             messages=messages,
             api_base=self.api_base,

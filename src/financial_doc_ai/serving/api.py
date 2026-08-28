@@ -45,10 +45,10 @@ def health() -> dict[str, str]:
 
 
 @app.post("/interpret")
-def interpret(
+async def interpret(
     req: InterpretRequest, orch: Orchestrator = Depends(get_orchestrator)
 ) -> Interpretation:
-    return orch.interpret(req.question, req.session_context)
+    return await orch.interpret(req.question, req.session_context)
 
 
 @app.post("/answer")
