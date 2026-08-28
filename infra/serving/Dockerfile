@@ -14,6 +14,6 @@ RUN uv sync --frozen
 
 EXPOSE 8000
 
-# The online API entrypoint is a later step. Until it exists, run components via
-# `docker compose run --rm app <cmd>` (overrides this CMD).
-CMD ["uv", "run", "uvicorn", "financial_doc_ai.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Online-path entry point: thin FastAPI over the orchestrator (/interpret,
+# /answer). Connects out to the retrieval MCP server via SEARCH_MCP_URL.
+CMD ["uv", "run", "uvicorn", "financial_doc_ai.serving.api:app", "--host", "0.0.0.0", "--port", "8000"]

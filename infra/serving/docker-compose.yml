@@ -10,6 +10,9 @@ services:
       - /app/.venv
     env_file:
       - ../../.env
+    environment:
+      # Retrieval MCP server (its own stack) reachable by container name on llm-net.
+      SEARCH_MCP_URL: http://retrieval-app-1:8001/mcp
     networks:
       - llm-net
 
