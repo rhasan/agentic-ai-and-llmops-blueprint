@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/retrieval/Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../..:/app
+      - /app/.venv
+    env_file:
+      - ../../.env
+    environment:
+      # Query embedding uses the same model the corpus was embedded with; the
+      # index is the one materialized by ingestion (repo bind-mounted at /app).
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8001"
+      CHROMA_PATH: /app/data/chroma
+    networks:
+      - llm-net
+
+networks:
+  llm-net:
+    external: true

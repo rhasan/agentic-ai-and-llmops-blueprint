@@ -1,5 +1,6 @@
 """Chroma wrapper — persists chunk embeddings + metadata for retrieval."""
 
+import os
 from pathlib import Path
 
 import chromadb
@@ -7,7 +8,14 @@ from chromadb.config import Settings
 
 
 class VectorStore:
-    def __init__(self, path: Path, collection_name: str = "chunks") -> None:
+    def __init__(
+        self, path: Path | None = None, collection_name: str = "chunks"
+    ) -> None:
+        # Default the on-disk location from env (CHROMA_PATH) so the retrieval
+        # server can construct one with no args, like Embedder reads its config
+        # from env. Callers that know the path (Dagster assets, tests) still pass
+        # it explicitly.
+        path = path if path is not None else Path(os.environ.get("CHROMA_PATH", "data/chroma"))
         # PersistentClient writes to disk (data/chroma/), so vectors survive
         # container restarts. Telemetry off — no phone-home from a blueprint.
         client = chromadb.PersistentClient(
@@ -57,4 +65,19 @@ class VectorStore:
             documents=[c["text"] for c in chunks],
             embeddings=embeddings,
             metadatas=metadatas,
+        )
+
+    def query(
+        self,
+        embedding: list[float],
+        where: dict | None = None,
+        n_results: int = 5,
+    ) -> dict:
+        # Metadata-filtered similarity search. Chroma rejects an empty {} filter,
+        # so pass None when there is nothing to filter on. Returns Chroma's raw
+        # parallel-array result dict; the caller shapes it into domain objects.
+        return self.collection.query(
+            query_embeddings=[embedding],
+            where=where or None,
+            n_results=n_results,
         )
