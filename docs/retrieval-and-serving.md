@@ -66,10 +66,21 @@ step. Rationale and the plain-language version: [async-vs-sync.md](async-vs-sync
 1. ✅ `search_filings` **MCP server** wrapping `VectorStore` (+ query embedding).
 2. ✅ Minimal **orchestrator** (MCP client) doing interpret → gate → search.
 3. ✅ Thin **FastAPI** entry point exposing the two-call flow (async).
+4. ✅ **Generation** — `AnswerGenerator` (`serving/generator.py`) drafts a cited
+   answer over the retrieved chunks: numbered `[n]` citations mapped back to results
+   by position, plus a `can_answer` abstention flag.
 
-Next: **generation + grounding + audit log** (draft with citations → grounding
-check: LLM grader + exact-match for numbers, pass→return / fail→abstain → immutable
-audit write).
+Next: **two answer-quality guards + audit log**. These catch *different* failures —
+don't conflate them:
+- **Guard 1 — answerability/relevance:** catches retrieval surfacing the wrong
+  passages (faithful answer to an irrelevant chunk — "right document, wrong
+  passage"). Lever: sharpen `can_answer` into a relevance gate + optional retrieval
+  **distance floor** so weak hits abstain before generation. Cheap; do first.
+- **Guard 2 — faithfulness/grounding:** catches invented/misstated content vs. the
+  sources (LLM grader for prose + exact-match for numbers, pass→return / fail→
+  abstain). A number/claim-integrity check — NOT a retrieval-quality net.
+- **Audit log:** synchronous immutable write of the full turn (question, confirmed
+  filters, retrieved chunk ids, answer, citations, can_answer, both guard verdicts).
 
 Deferred: company resolver upgrade (low priority), ground-truth figures MCP tool,
 durable HITL state, web UI.

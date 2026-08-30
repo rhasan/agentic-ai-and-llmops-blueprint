@@ -11,6 +11,7 @@ from financial_doc_ai.query.pipeline import ResolvedQuery
 from financial_doc_ai.query.resolver import Canonical, Resolution
 from financial_doc_ai.query.rewriter import Filters, QueryRewrite
 from financial_doc_ai.retrieval.search import Citation, SearchResult
+from financial_doc_ai.serving.generator import GeneratedAnswer
 from financial_doc_ai.serving.orchestrator import Orchestrator, _needs_confirmation
 
 _AAPL = Canonical(ticker="AAPL", name="Apple Inc.", cik="320193")
@@ -132,18 +133,37 @@ class _FakeSearchClient:
         return self._results
 
 
+class _FakeGenerator:
+    def __init__(self, generated):
+        self._generated = generated
+        self.calls = []
+
+    async def generate(self, question, results):
+        self.calls.append((question, results))
+        return self._generated
+
+
 def test_answer_retrieves_on_confirmed_filters():
     hit = SearchResult(
         text="Apple risk factors",
         distance=0.1,
         citation=Citation(natural_id="AAPL-10K-2024", company="AAPL", period="2024"),
     )
-    fake = _FakeSearchClient([hit])
-    orch = Orchestrator(pipeline=_StubPipeline(_resolved()), search_client=fake)
+    fake_search = _FakeSearchClient([hit])
+    fake_generated = GeneratedAnswer(answer="Apple faces risk [1]", citations=[1], can_answer=True)
+    fake_generator = _FakeGenerator(fake_generated)
+    orch = Orchestrator(
+        pipeline=_StubPipeline(_resolved()),
+        search_client=fake_search,
+        generator=fake_generator,
+    )
 
     confirmed = Filters(company=["AAPL"], period=["2024"])
     answer = asyncio.run(orch.answer("risk factors", confirmed, top_k=3))
 
     assert answer.results == [hit]
+    assert answer.generated == fake_generated
     # The confirmed filters (not a re-run of rewrite/resolve) drive retrieval.
-    assert fake.calls == [("risk factors", confirmed, 3)]
+    assert fake_search.calls == [("risk factors", confirmed, 3)]
+    # Generation runs on the chunks retrieval actually returned.
+    assert fake_generator.calls == [("risk factors", [hit])]

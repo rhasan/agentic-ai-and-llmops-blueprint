@@ -40,3 +40,6 @@ data/
 
 # other dot files
 .ruff_cache
+
+# specs handed to other models (working scratch, not part of the repo)
+docs/specs/

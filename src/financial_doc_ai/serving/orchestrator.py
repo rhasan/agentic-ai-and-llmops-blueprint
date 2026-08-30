@@ -2,13 +2,14 @@
 
 `interpret(question)` runs rewrite -> resolve and proposes filters, flagging when
 the analyst must confirm before retrieval. `answer(question, confirmed_filters)`
-takes the (possibly corrected) filters back and calls the `search_filings` MCP
-tool. Splitting the two puts a human confirmation gate in front of retrieval — the
-one failure the grounding check can't catch (answer correctly grounded in the
-*wrong* document). See docs/retrieval-and-serving.md.
+takes the (possibly corrected) filters back, calls the `search_filings` MCP tool,
+and generates a cited answer over the retrieved chunks. Splitting interpret/answer
+puts a human confirmation gate in front of retrieval — the one failure the
+grounding check can't catch (answer correctly grounded in the *wrong* document).
+See docs/retrieval-and-serving.md.
 
-Generation + grounding + audit come later; `answer` currently stops at retrieved,
-cited passages — enough to exercise the gate end-to-end.
+Grounding + audit come later; `answer` currently stops at a generated, cited
+answer plus the raw retrieved passages — enough to exercise the gate end-to-end.
 """
 
 from pydantic import BaseModel
@@ -17,6 +18,7 @@ from financial_doc_ai.query.pipeline import QueryPipeline, ResolvedQuery
 from financial_doc_ai.query.resolver import Resolution
 from financial_doc_ai.query.rewriter import Filters
 from financial_doc_ai.retrieval.search import SearchResult
+from financial_doc_ai.serving.generator import AnswerGenerator, GeneratedAnswer
 from financial_doc_ai.serving.search_client import SearchClient
 
 
@@ -30,6 +32,7 @@ class Interpretation(BaseModel):
 
 
 class Answer(BaseModel):
+    generated: GeneratedAnswer
     results: list[SearchResult]
 
 
@@ -59,11 +62,14 @@ class Orchestrator:
         self,
         pipeline: QueryPipeline | None = None,
         search_client: SearchClient | None = None,
+        generator: AnswerGenerator | None = None,
     ) -> None:
         self.pipeline = pipeline if pipeline is not None else QueryPipeline()
         # Left None until first use so `interpret` (which never retrieves) doesn't
-        # require SEARCH_MCP_URL; the default client is built lazily in `answer`.
+        # require SEARCH_MCP_URL / ANSWER_GENERATION_MODEL; both are built lazily
+        # in `answer`.
         self.search_client = search_client
+        self.generator = generator
 
     async def interpret(self, question: str, session_context: str | None = None) -> Interpretation:
         # Async because the pipeline's rewrite step is a live LLM call — see
@@ -98,4 +104,7 @@ class Orchestrator:
         if self.search_client is None:
             self.search_client = SearchClient()
         results = await self.search_client.search(question, confirmed_filters, top_k)
-        return Answer(results=results)
+        if self.generator is None:
+            self.generator = AnswerGenerator()
+        generated = await self.generator.generate(question, results)
+        return Answer(generated=generated, results=results)

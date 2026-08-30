@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from financial_doc_ai.query.rewriter import Filters, QueryRewrite
 from financial_doc_ai.retrieval.search import Citation, SearchResult
 from financial_doc_ai.serving.api import app, get_orchestrator
+from financial_doc_ai.serving.generator import GeneratedAnswer
 from financial_doc_ai.serving.orchestrator import Answer, Interpretation
 
 
@@ -30,13 +31,20 @@ class _FakeOrchestrator:
 
     async def answer(self, question, confirmed_filters, top_k=5):
         self.answer_calls.append((question, confirmed_filters, top_k))
-        return Answer(results=[
-            SearchResult(
-                text="Apple risk factors",
-                distance=0.1,
-                citation=Citation(natural_id="AAPL-10K-2024", company="AAPL", period="2024"),
-            )
-        ])
+        return Answer(
+            generated=GeneratedAnswer(
+                answer="Apple faces risks including... [1]",
+                citations=[1],
+                can_answer=True,
+            ),
+            results=[
+                SearchResult(
+                    text="Apple risk factors",
+                    distance=0.1,
+                    citation=Citation(natural_id="AAPL-10K-2024", company="AAPL", period="2024"),
+                )
+            ],
+        )
 
 
 def _client(fake):
@@ -79,8 +87,11 @@ def test_answer_retrieves_on_posted_filters():
         app.dependency_overrides.clear()
 
     assert resp.status_code == 200
-    results = resp.json()["results"]
+    body = resp.json()
+    results = body["results"]
     assert results[0]["citation"]["natural_id"] == "AAPL-10K-2024"
+    assert body["generated"]["answer"]
+    assert body["generated"]["can_answer"] is True
     # The posted (confirmed) filters + top_k reach the orchestrator verbatim.
     _, filters, top_k = fake.answer_calls[0]
     assert filters == Filters(company=["AAPL"], period=["2024"])

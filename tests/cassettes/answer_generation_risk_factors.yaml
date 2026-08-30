@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: '{"model": "qwen2.5:3b-instruct", "prompt": "### System:\nYou answer a financial
+      analyst''s question using only the numbered passages provided. Do not use outside
+      knowledge.\n\n- Cite every claim with the passage marker(s) it came from, inline
+      in the answer text, e.g. \"net sales rose [2]\". List those same numbers in
+      the `citations` field.\n- Never invent or alter numbers. Only state a figure
+      if it appears verbatim in a passage, and cite it.\n- If the passages do not
+      contain enough to answer the question, set `can_answer` to false, write a one-sentence
+      explanation in `answer`, and leave `citations` empty. Do not guess.\n- Be concise
+      and factual. No preamble.\n- Return the structured fields `answer`, `citations`,
+      and `can_answer`.\n\n\n### User:\nQuestion: What are Apple''s main risk factors?\n\nPassages:\n[1]
+      (Apple 10-K 2024) The Company''s business is subject to the risks of doing business
+      internationally, including... currency fluctuations and compliance with U.S.
+      and foreign laws and regulations.\n[2] (Apple 10-K 2024) The Company depends
+      on component and product manufacturing and logistical services provided by outsourcing
+      partners, many of which are located outside of the U.S.\n\n", "options": {},
+      "stream": false, "format": {"properties": {"answer": {"title": "Answer", "type":
+      "string"}, "citations": {"default": [], "items": {"type": "integer"}, "title":
+      "Citations", "type": "array"}, "can_answer": {"title": "Can Answer", "type":
+      "boolean"}}, "required": ["answer", "citations", "can_answer"], "title": "GeneratedAnswer",
+      "type": "object", "additionalProperties": false}, "images": []}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '1612'
+      host:
+      - ollama:11434
+      user-agent:
+      - litellm/1.98.0
+    method: POST
+    uri: http://ollama:11434/api/generate
+  response:
+    body:
+      string: '{"model":"qwen2.5:3b-instruct","created_at":"2026-08-30T10:35:21.326891688Z","response":"{\n  \"answer\":
+        \"Apple''s main risk factors include currency fluctuations [1] and the reliance
+        on outsourcing partners for manufacturing and logistical services [2].\",\n  \"citations\":
+        [1, 2],\n  \"can_answer\": true\n}","done":true,"done_reason":"stop","context":[151644,8948,198,2610,525,1207,16948,11,3465,553,54364,14817,13,1446,525,264,10950,17847,13,151645,198,151644,872,198,14374,739,510,2610,4226,264,5896,18237,594,3405,1667,1172,279,48826,46769,3897,13,3155,537,990,4889,6540,382,12,356,632,1449,3717,448,279,21085,11134,1141,8,432,3697,504,11,7381,304,279,4226,1467,11,384,1302,13,330,4711,6625,16009,508,17,60,3263,1759,1846,1852,5109,304,279,1565,66,30667,63,2070,624,12,14695,17023,476,11596,5109,13,8278,1584,264,7071,421,432,7952,2739,54748,304,264,21085,11,323,38296,432,624,12,1416,279,46769,653,537,6644,3322,311,4226,279,3405,11,738,1565,4814,28534,63,311,895,11,3270,264,825,1331,18380,16148,304,1565,9217,7808,323,5274,1565,66,30667,63,4287,13,3155,537,7942,624,12,2823,63594,323,59901,13,2308,89454,624,12,3411,279,32930,5043,1565,9217,7808,1565,66,30667,7808,323,1565,4814,28534,63,4192,14374,2657,510,14582,25,3555,525,8162,594,1887,5214,9363,1939,12187,1134,510,58,16,60,320,26567,220,16,15,15843,220,17,15,17,19,8,576,8188,594,2562,374,3832,311,279,15276,315,3730,2562,36445,11,2670,1112,11413,64549,323,8733,448,547,808,13,323,7214,6872,323,14305,624,58,17,60,320,26567,220,16,15,15843,220,17,15,17,19,8,576,8188,13798,389,3692,323,1985,14919,323,95868,3516,3897,553,74692,8549,11,1657,315,892,525,7407,4889,315,279,547,808,382,151645,198,151644,77091,198,515,220,330,9217,788,330,26567,594,1887,5214,9363,2924,11413,64549,508,16,60,323,279,53080,389,74692,8549,369,14919,323,95868,3516,508,17,936,756,220,330,66,30667,788,508,16,11,220,17,1259,220,330,4814,28534,788,830,198,92],"total_duration":12565760992,"load_duration":4130962019,"prompt_eval_count":293,"prompt_eval_duration":5132156000,"eval_count":52,"eval_duration":3297443000}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 30 Aug 2026 10:35:21 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -8,3 +8,8 @@
 name  = "query-rewrite-system"
 label = "production"
 file  = "query_rewrite_system.md"
+
+[answer_generation]
+name  = "answer-generation-system"
+label = "production"
+file  = "answer_generation_system.md"
