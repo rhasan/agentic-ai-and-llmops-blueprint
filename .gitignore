@@ -43,3 +43,6 @@ data/
 
 # specs handed to other models (working scratch, not part of the repo)
 docs/specs/
+
+# throwaway scratch (harnesses, one-off probes) — never pushed
+scratch/
