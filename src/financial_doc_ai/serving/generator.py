@@ -72,6 +72,7 @@ class AnswerGenerator:
             messages=messages,
             api_base=self.api_base,
             response_format=GeneratedAnswer,
+            temperature=0.0,
         )
         parsed = GeneratedAnswer.model_validate_json(response.choices[0].message.content)
 

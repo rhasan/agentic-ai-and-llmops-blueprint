@@ -1,12 +1,12 @@
 services:
   ollama:
     build:
-      context: .                   # infra/ingestion — so COPY sees certs/
+      context: . # infra/ingestion — so COPY sees certs/
       dockerfile: Dockerfile.ollama
     volumes:
       - ollama_models:/root/.ollama
     healthcheck:
-      test: ["CMD", "ollama", "list"]
+      test: [ "CMD", "ollama", "list" ]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -17,27 +17,24 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=ollama:11434
-    command: ["pull", "nomic-embed-text"]
+    command: [ "pull", "nomic-embed-text" ]
     restart: "no"
-    
+
   app:
     build:
-      context: ../..                          # repo root — so COPY sees pyproject/src
-      dockerfile: infra/ingestion/Dockerfile  # path relative to context
+      context: ../.. # repo root — so COPY sees pyproject/src
+      dockerfile: infra/ingestion/Dockerfile # path relative to context
     ports:
       - "3000:3000"
     volumes:
-      - ../..:/app          # live code edits; path is relative to this compose file
-      - /app/.venv          # keep container venv, don't shadow with host
+      - ../..:/app # live code edits; path is relative to this compose file
+      - /app/.venv # keep container venv, don't shadow with host
       - dagster_home:/opt/dagster_home
     environment:
       - DAGSTER_HOME=/opt/dagster_home
     env_file:
-      - ../../.env          # .env at repo root
-    depends_on:
-      ollama-pull:
-        condition: service_completed_successfully
+      - ../../.env # .env at repo root
 
 volumes:
-    dagster_home:
-    ollama_models:
+  dagster_home:
+  ollama_models:
