@@ -84,3 +84,13 @@ don't conflate them:
 
 Deferred: company resolver upgrade (low priority), ground-truth figures MCP tool,
 durable HITL state, web UI.
+
+TODO — make the chunk vector store configurable (currently hardcoded to Chroma;
+`storage/vector_store.py` imports `chromadb` directly and always builds a Chroma
+client):
+- Add `VECTOR_STORE_BACKEND` (env, in `.env`) so the `VectorStore` seam builds
+  Chroma (local default) or OpenSearch (cloud), matching the model seam. Path and
+  connection settings follow per backend.
+- Promote the chunk collection name from the hardcoded `collection_name="chunks"`
+  default to an explicit env var (`CHUNK_COLLECTION`), so it is never left implicit
+  and can be isolated from other collections.
