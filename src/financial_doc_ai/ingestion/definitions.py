@@ -10,6 +10,7 @@ from financial_doc_ai.company_registry import CompanyRegistry
 from financial_doc_ai.ingestion.chunker import MarkdownChunker
 from financial_doc_ai.ingestion.edgar import EdgarClient
 from financial_doc_ai.ingestion.embedder import Embedder
+from financial_doc_ai.ingestion.graph_indexer import build_graph_index
 from financial_doc_ai.ingestion.metadata import chunk_filter_fields
 from financial_doc_ai.ingestion.parser import FilingParser
 from financial_doc_ai.storage import ChunkStore, ParsedStore, RawStore, VectorStore
@@ -198,4 +199,24 @@ def embedded_chunks(context: dg.AssetExecutionContext) -> None:
             context.log.info(f"Embedded {rec['natural_id']}: {len(chunks)} chunks")
 
 
-defs = dg.Definitions(assets=[raw_filings, parsed_filings, chunked_filings, embedded_chunks])
+@dg.asset(deps=[chunked_filings])
+def graph_index(context: dg.AssetExecutionContext) -> None:
+    """Builds the GraphRAG knowledge graph from the chunk store.
+
+    Feeds the existing chunks into GraphRAG as its input documents (one chunk =
+    one text unit, keyed by our chunk id) and runs the full extract → resolve →
+    community pipeline, writing Parquet artifacts under data/graphrag/. Sits
+    beside embedded_chunks as a second index over the same chunks. Full rebuild
+    each run (GraphRAG indexes the whole set, not per-document).
+    """
+    chunk_store = ChunkStore(Path("/app/data"))
+    if not chunk_store.manifest_path.exists():
+        context.log.info("No chunked filings to index.")
+        return
+    count = build_graph_index()
+    context.log.info(f"GraphRAG index built over {count} chunks.")
+
+
+defs = dg.Definitions(
+    assets=[raw_filings, parsed_filings, chunked_filings, embedded_chunks, graph_index]
+)

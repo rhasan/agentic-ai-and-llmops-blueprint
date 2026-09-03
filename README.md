@@ -26,10 +26,12 @@ Build one coherent agentic AI application and the complete lifecycle around it:
 
 ## Tech Stack
 
-- **LLM / Orchestration:** Azure OpenAI, LangChain / LangGraph
-- **Cloud:** Azure, AWS
+- **LLM / Orchestration:** PydanticAI
+- **Cloud:** Azure, Amazon Bedrock
+- **Data and Backend:** Chroma, Microsoft GraphRAG with LanceDB, Dagster
+- **Serving:** FastAPI, MCP
 - **CI/CD:** GitHub Actions, Docker
-- **Evaluation:** RAGAS, VCR.py, eval-in-CI gates
+- **Testing and Evaluation:** pytest, VCR.py, RAGAS, eval-in-CI gates
 - **Observability:** Arize Phoenix (single-container, OpenTelemetry), tracing,
   four monitoring signals (cost, latency, drift, quality)
 
@@ -47,6 +49,7 @@ Copy the example environment file and configure your SEC EDGAR `User-Agent`:
 ```bash
 cp .env.example .env
 ```
+See [.env.example](.env.example) for all configuration options (model provider, credentials, and tuning knobs).
 
 ### 2. Run Tests (Offline via VCR)
 ```bash
@@ -59,13 +62,12 @@ docker compose -f infra/ingestion/docker-compose.yml up --build
 ```
 Open [http://localhost:3000](http://localhost:3000) to view the asset graph and materialize `raw_filings`.
 
-## Skills
+### 4. Build the GraphRAG index
+Runbook (prompt auto-tune + index build) in [config/graphrag/README.md](config/graphrag/README.md).
 
-Claude Code skills bundled with this repo (`.claude/skills/`). Invoke with `/<skill>`.
-
-| Skill | Description |
-|-------|-------------|
-| `progress-report` | Generates a status report of the build — what's done, % complete across the three blueprint areas, and remaining effort estimated in work-sessions. |
+### 5. Start the online query path
+The serving stack (FastAPI + retrieval MCP server) runs on the shared `llm-net`
+network.
 
 ## License
 
@@ -73,4 +75,4 @@ TBD.
 
 Third-party note: the observability stack uses **Arize Phoenix**, licensed under the
 **Elastic License 2.0 (ELv2)** — free for internal and reference use; may not be offered
-as a competing managed service. See [docs/observability.md](docs/observability.md).
+as a competing managed service.

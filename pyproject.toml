@@ -14,10 +14,12 @@ dependencies = [
     "dagster>=1.13.18",
     "dagster-webserver>=1.13.18",
     "fastapi>=0.115.0",
+    "graphrag>=3.1.2",
+    "pandas>=2.0.0",
     "httpx>=0.28.1",
     "uvicorn>=0.34.0",
     "langchain-text-splitters>=1.1.2",
-    "litellm>=1.98.0",
+    "litellm==1.92.0",  # pinned: graphrag 3.1.2 hard-pins litellm==1.92.0
     "markdownify>=1.2.3",
     "mcp>=2.1.0",
     "tenacity>=9.1.4",

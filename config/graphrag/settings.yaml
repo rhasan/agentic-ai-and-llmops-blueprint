@@ -1,0 +1,46 @@
+# GraphRAG index config (blueprint). Models are NOT declared here — they are
+# injected in code from the same .env model strings the rest of the app uses
+# (see ingestion/graph_indexer.py), so one .env switch moves GraphRAG and the
+# online loop together. GraphRagConfig validates models lazily, so an empty
+# model set at load time is valid.
+#
+# Input is passed in-process as a DataFrame (build_index(input_documents=...)),
+# so no input_storage block is needed.
+
+# One chunk in = one text unit out. Our chunks are already the retrieval units;
+# a huge size + no overlap stops GraphRAG re-splitting them, so text_unit
+# document_id stays our chunk id ("{natural_id}:{chunk_index}").
+chunking:
+  size: 999999
+  overlap: 0
+
+# Auto-tuned prompts (setup phase, run once via ingestion/graph_prompt_tune.py;
+# reviewed, then fixed in git). Paths resolve relative to this file's dir.
+# NB: the discovered entity-type list is baked *into* extract_graph.txt, so the
+# `entity_types` config field is bypassed — edit that file to change the ontology.
+extract_graph:
+  prompt: prompts/extract_graph.txt
+summarize_descriptions:
+  prompt: prompts/summarize_descriptions.txt
+community_reports:
+  graph_prompt: prompts/community_report.txt
+
+# Artifacts live under the gitignored data/ dir, not in the tracked config dir.
+# NB: cache.type is json|memory|none (not a storage type); 'file' belongs on the
+# nested storage. Storage blocks take file|memory|blob|cosmosdb.
+output_storage:
+  type: file
+  base_dir: /app/data/graphrag/output
+cache:
+  type: json
+  storage:
+    type: file
+    base_dir: /app/data/graphrag/cache
+reporting:
+  type: file
+  base_dir: /app/data/graphrag/logs
+
+# Graph embeddings (entity/text-unit vectors) — local file-backed store for now.
+vector_store:
+  type: lancedb
+  db_uri: /app/data/graphrag/output/lancedb

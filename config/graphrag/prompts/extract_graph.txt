@@ -1,0 +1,278 @@
+
+-Goal-
+Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.
+
+-Steps-
+1. Identify all entities. For each identified entity, extract the following information:
+- entity_name: Name of the entity, capitalized
+- entity_type: One of the following types: [company, board of directors, audit committee, management, executive officer, government agency, regulatory body, court, legal proceeding, financial statement, reporting segment, product category, geographic region, stock exchange, security holder, accounting firm, tax authority, supplier, customer, contract, debt security, equity security, cybersecurity team]
+- entity_description: Comprehensive description of the entity's attributes and activities
+Format each entity as ("entity"<|><entity_name><|><entity_type><|><entity_description>)
+
+2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
+For each pair of related entities, extract the following information:
+- source_entity: name of the source entity, as identified in step 1
+- target_entity: name of the target entity, as identified in step 1
+- relationship_description: explanation as to why you think the source entity and the target entity are related to each other
+- relationship_strength: an integer score between 1 to 10, indicating strength of the relationship between the source entity and target entity
+Format each relationship as ("relationship"<|><source_entity><|><target_entity><|><relationship_description><|><relationship_strength>)
+
+3. Return output in English as a single list of all the entities and relationships identified in steps 1 and 2. Use **##** as the list delimiter.
+
+4. If you have to translate into English, just translate the descriptions, nothing else!
+
+5. When finished, output <|COMPLETE|>.
+
+-Examples-
+######################
+
+Example 1:
+
+entity_types: [company, board of directors, audit committee, management, executive officer, government agency, regulatory body, court, legal proceeding, financial statement, reporting segment, product category, geographic region, stock exchange, security holder, accounting firm, tax authority, supplier, customer, contract, debt security, equity security, cybersecurity team]
+text:
+*Indicates management contract or compensatory plan or arrangement.  
+**Filed herewith.  
+***Furnished herewith.  
+(1)Certain instruments defining the rights of holders of long-term debt securities of the Registrant are omitted pursuant to Item 601(b)(4)(iii) of Regulation S-K. The Registrant hereby undertakes to furnish to the SEC, upon request, copies of any such instruments.  
+Item 16.Form 10-K Summary  
+None.  
+SIGNATURES  
+Pursuant to the requirements of Section 13 or 15(d) of the Securities Exchange Act of 1934, the Registrant has duly caused this report to be signed on its behalf by the undersigned, thereunto duly authorized.
+------------------------
+output:
+("entity"<|>COMPANY<|>company<|>The registrant company discussed in the Form 10-K, which reports management’s discussion and analysis, announces products and services, and is affected by macroeconomic conditions, tariffs, and legal/regulatory developments)##
+("entity"<|>CONSOLIDATED FINANCIAL STATEMENTS<|>financial statement<|>The consolidated financial statements and accompanying notes of the company, referenced as part of Part II, Item 8 of the Form 10-K and used in conjunction with management’s discussion and analysis)##
+("entity"<|>MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS<|>financial statement<|>The narrative financial discussion in Item 7 of the Form 10-K that reviews 2025 and 2024 results, product announcements, fiscal periods, macroeconomic conditions, tariffs, and segment operating performance)##
+("entity"<|>MACBOOK PRO<|>product category<|>A product announced by the company during the first quarter of fiscal year 2025)##
+("entity"<|>MAC MINI<|>product category<|>A product announced by the company during the first quarter of fiscal year 2025)##
+("entity"<|>IMAC<|>product category<|>A product announced by the company during the first quarter of fiscal year 2025)##
+("entity"<|>IPAD MINI<|>product category<|>product category<|>A product announced by the company during the first quarter of fiscal year 2025)##
+("entity"<|>IPHONE 16E<|>product category<|>A product announced by the company during the second quarter of fiscal year 2025)##
+("entity"<|>IPAD AIR<|>product category<|>A product announced by the company during the second quarter of fiscal year 2025)##
+("entity"<|>IPAD<|>product category<|>A product announced by the company during the second quarter of fiscal year 2025)##
+("entity"<|>MACBOOK AIR<|>product category<|>A product announced by the company during the second quarter of fiscal year 2025)##
+("entity"<|>MAC STUDIO<|>product category<|>A product announced by the company during the second quarter of fiscal year 2025)##
+("entity"<|>IOS 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>MACOS TAHOE 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>IPADOS 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>WATCHOS 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>VISIONOS 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>TVOS 26<|>product category<|>A software offering announced by the company during the third quarter of fiscal year 2025)##
+("entity"<|>IPHONE 17<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>IPHONE AIR<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>IPHONE 17 PRO<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>IPHONE 17 PRO MAX<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>APPLE WATCH SERIES 11<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>APPLE WATCH SE 3<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>APPLE WATCH ULTRA 3<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>AIRPODS PRO 3<|>product category<|>A product announced by the company during the fourth quarter of fiscal year 2025)##
+("entity"<|>U.S. DEPARTMENT OF COMMERCE<|>government agency<|>The U.S. government department that initiated a Section 232 investigation into imports of semiconductors, semiconductor manufacturing equipment, and derivative products)##
+("entity"<|>CHINA<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>INDIA<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>JAPAN<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>SOUTH KOREA<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>TAIWAN<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>VIETNAM<|>geographic region<|>A country named as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>EU<|>geographic region<|>The European Union, referenced as a source of imports subject to additional U.S. tariffs)##
+("entity"<|>U.S.<|>geographic region<|>The United States, referenced as the source of tariffs and retaliatory trade measures)##
+("entity"<|>SECTION 232 INVESTIGATION<|>legal proceeding<|>An investigation initiated by the U.S. Department of Commerce under Section 232 of the Trade Expansion Act of 1962 into imports of semiconductors, semiconductor manufacturing equipment, and derivative products)##
+("entity"<|>REPORTABLE SEGMENT<|>reporting segment<|>The company’s reportable business segment(s) referenced in the segment operating performance table for 2025, 2024, and 2023 net sales)##
+("relationship"<|>COMPANY<|>CONSOLIDATED FINANCIAL STATEMENTS<|>The company’s management discussion references its consolidated financial statements and accompanying notes in Part II, Item 8<|>8)##
+("relationship"<|>COMPANY<|>MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS<|>The management discussion and analysis section is part of the company’s Form 10-K narrative reporting<|>10)##
+("relationship"<|>COMPANY<|>MACBOOK PRO<|>The company announced MacBook Pro as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>MAC MINI<|>The company announced Mac mini as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IMAC<|>The company announced iMac as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPAD MINI<|>The company announced iPad mini as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPHONE 16E<|>The company announced iPhone 16e as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPAD AIR<|>The company announced iPad Air as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPAD<|>The company announced iPad as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>MACBOOK AIR<|>The company announced MacBook Air as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>MAC STUDIO<|>The company announced Mac Studio as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IOS 26<|>The company announced iOS 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>MACOS TAHOE 26<|>The company announced macOS Tahoe 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPADOS 26<|>The company announced iPadOS 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>WATCHOS 26<|>The company announced watchOS 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>VISIONOS 26<|>The company announced visionOS 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>TVOS 26<|>The company announced tvOS 26 as a new software offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPHONE 17<|>The company announced iPhone 17 as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPHONE AIR<|>The company announced iPhone Air as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPHONE 17 PRO<|>The company announced iPhone 17 Pro as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>IPHONE 17 PRO MAX<|>The company announced iPhone 17 Pro Max as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>APPLE WATCH SERIES 11<|>The company announced Apple Watch Series 11 as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>APPLE WATCH SE 3<|>The company announced Apple Watch SE 3 as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>APPLE WATCH ULTRA 3<|>The company announced Apple Watch Ultra 3 as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>AIRPODS PRO 3<|>The company announced AirPods Pro 3 as a new product offering in fiscal year 2025<|>9)##
+("relationship"<|>COMPANY<|>U.S. DEPARTMENT OF COMMERCE<|>The U.S. Department of Commerce initiated a Section 232 investigation that could affect the company’s business and supply chain<|>7)##
+("relationship"<|>COMPANY<|>CHINA<|>The company’s products and components may be affected by additional tariffs on imports from China<|>7)##
+("relationship"<|>COMPANY<|>INDIA<|>The company’s products and components may be affected by additional tariffs on imports from India<|>7)##
+("relationship"<|>COMPANY<|>JAPAN<|>The company’s products and components may be affected by additional tariffs on imports from Japan<|>7)##
+("relationship"<|>COMPANY<|>SOUTH KOREA<|>The company’s products and components may be affected by additional tariffs on imports from South Korea<|>7)##
+("relationship"<|>COMPANY<|>TAIWAN<|>The company’s products and components may be affected by additional tariffs on imports from Taiwan<|>7)##
+("relationship"<|>COMPANY<|>VIETNAM<|>The company’s products and components may be affected by additional tariffs on imports from Vietnam<|>7)##
+("relationship"<|>COMPANY<|>EU<|>The company’s products and components may be affected by additional tariffs on imports from the EU<|>7)##
+("relationship"<|>COMPANY<|>U.S.<|>The company is affected by U.S. tariffs and retaliatory trade measures referenced in the filing<|>6)##
+("relationship"<|>COMPANY<|>SECTION 232 INVESTIGATION<|>The company is impacted by the Section 232 investigation into semiconductor-related imports<|>7)##
+("relationship"<|>COMPANY<|>REPORTABLE SEGMENT<|>The company reports net sales by reportable segment in the segment operating performance table<|>8)##
+<|COMPLETE|>
+#############################
+
+
+Example 2:
+
+entity_types: [company, board of directors, audit committee, management, executive officer, government agency, regulatory body, court, legal proceeding, financial statement, reporting segment, product category, geographic region, stock exchange, security holder, accounting firm, tax authority, supplier, customer, contract, debt security, equity security, cybersecurity team]
+text:
+FORM 10-K
+------------------------
+output:
+("entity"<|>COMPANY<|>company<|>The registrant company whose Form 10-K discusses financial condition, results of operations, product announcements, fiscal periods, macroeconomic conditions, tariffs, and segment operating performance. It is the company referenced throughout the filing and appears to be Apple Inc. based on the product names and AAPL reference in the broader document)
+##
+("entity"<|>CONSOLIDATED FINANCIAL STATEMENTS<|>financial statement<|>The consolidated financial statements and accompanying notes included in Part II, Item 8 of the Form 10-K, which should be read in conjunction with Management’s Discussion and Analysis)
+##
+("entity"<|>MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS<|>financial statement<|>The Form 10-K section that discusses the company’s financial condition and operating results, including year-to-year comparisons and operating environment factors)
+##
+("entity"<|>MACBOOK PRO<|>product category<|>A product announced by the company during the first quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>MAC MINI<|>product category<|>A product announced by the company during the first quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IMAC<|>product category<|>A product announced by the company during the first quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPAD MINI<|>product category<|>A product announced by the company during the first quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPHONE 16E<|>product category<|>A product announced by the company during the second quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPAD AIR<|>product category<|>A product announced by the company during the second quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPAD<|>product category<|>A product announced by the company during the second quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>MACBOOK AIR<|>product category<|>A product announced by the company during the second quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>MAC STUDIO<|>product category<|>A product announced by the company during the second quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IOS 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>MACOS TAHOE 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>IPADOS 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>WATCHOS 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>VISIONOS 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>TVOS 26<|>product category<|>A software operating system announced by the company during the third quarter of fiscal 2025)
+##
+("entity"<|>IPHONE 17<|>product category<|>A product announced by the company during the fourth quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPHONE AIR<|>product category<|>A product announced by the company during the fourth quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPHONE 17 PRO<|>product category<|>A product announced by the company during the fourth quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>IPHONE 17 PRO MAX<|>product category<|>A product announced by the company during the fourth quarter of fiscal 2025 as part of its product, service, and software offerings)
+##
+("entity"<|>APPLE WATCH SERIES 11<|>product category<|>A smartwatch product announced by the company during the fourth quarter of fiscal 2025)
+##
+("entity"<|>APPLE WATCH SE 3<|>product category<|>A smartwatch product announced by the company during the fourth quarter of fiscal 2025)
+##
+("entity"<|>APPLE WATCH ULTRA 3<|>product category<|>A smartwatch product announced by the company during the fourth quarter of fiscal 2025)
+##
+("entity"<|>AIRPODS PRO 3<|>product category<|>A wireless earbuds product announced by the company during the fourth quarter of fiscal 2025)
+##
+("entity"<|>U.S. DEPARTMENT OF COMMERCE<|>government agency<|>The U.S. government agency that initiated a Section 232 investigation into imports of semiconductors, semiconductor manufacturing equipment, and derivative products)
+##
+("entity"<|>CHINA<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>INDIA<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>JAPAN<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>SOUTH KOREA<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>TAIWAN<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>VIETNAM<|>geographic region<|>A country from which additional U.S. tariffs on imports were announced)
+##
+("entity"<|>EU<|>geographic region<|>The European Union, identified as a region subject to additional tariffs on imports")
+##
+("entity"<|>U.S.<|>geographic region<|>The United States, referenced as the source of tariffs and retaliatory trade measures")
+##
+("entity"<|>REPORTABLE SEGMENT<|>reporting segment<|>The company’s operating segment or segments for which net sales are shown by reportable segment in the table referenced in Item 7")
+##
+("relationship"<|>COMPANY<|>CONSOLIDATED FINANCIAL STATEMENTS<|>The management discussion says the discussion should be read in conjunction with the consolidated financial statements and accompanying notes<|>7)
+##
+("relationship"<|>COMPANY<|>MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS<|>The discussion and analysis section is about the company’s financial condition and results of operations<|>10)
+##
+("relationship"<|>COMPANY<|>MACBOOK PRO<|>The company announced MacBook Pro in the first quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>MAC MINI<|>The company announced Mac mini in the first quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IMAC<|>The company announced iMac in the first quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPAD MINI<|>The company announced iPad mini in the first quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPHONE 16E<|>The company announced iPhone 16e in the second quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPAD AIR<|>The company announced iPad Air in the second quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPAD<|>The company announced iPad in the second quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>MACBOOK AIR<|>The company announced MacBook Air in the second quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>MAC STUDIO<|>The company announced Mac Studio in the second quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IOS 26<|>The company announced iOS 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>MACOS TAHOE 26<|>The company announced macOS Tahoe 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPADOS 26<|>The company announced iPadOS 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>WATCHOS 26<|>The company announced watchOS 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>VISIONOS 26<|>The company announced visionOS 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>TVOS 26<|>The company announced tvOS 26 in the third quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPHONE 17<|>The company announced iPhone 17 in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPHONE AIR<|>The company announced iPhone Air in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPHONE 17 PRO<|>The company announced iPhone 17 Pro in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>IPHONE 17 PRO MAX<|>The company announced iPhone 17 Pro Max in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>APPLE WATCH SERIES 11<|>The company announced Apple Watch Series 11 in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>APPLE WATCH SE 3<|>The company announced Apple Watch SE 3 in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>APPLE WATCH ULTRA 3<|>The company announced Apple Watch Ultra 3 in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>AIRPODS PRO 3<|>The company announced AirPods Pro 3 in the fourth quarter of fiscal 2025<|>9)
+##
+("relationship"<|>COMPANY<|>U.S. DEPARTMENT OF COMMERCE<|>The U.S. Department of Commerce initiated an investigation into imports that may affect the company’s business<|>7)
+##
+("relationship"<|>COMPANY<|>CHINA<|>The company’s products or components may be subject to tariffs on imports from China<|>7)
+##
+("relationship"<|>COMPANY<|>INDIA<|>The company’s products or components may be subject to tariffs on imports from India<|>7)
+##
+("relationship"<|>COMPANY<|>JAPAN<|>The company’s products or components may be subject to tariffs on imports from Japan<|>7)
+##
+("relationship"<|>COMPANY<|>SOUTH KOREA<|>The company’s products or components may be subject to tariffs on imports from South Korea<|>7)
+##
+("relationship"<|>COMPANY<|>TAIWAN<|>The company’s products or components may be subject to tariffs on imports from Taiwan<|>7)
+##
+("relationship"<|>COMPANY<|>VIETNAM<|>The company’s products or components may be subject to tariffs on imports from Vietnam<|>7)
+##
+("relationship"<|>COMPANY<|>EU<|>The company’s products or components may be subject to tariffs on imports from the EU<|>7)
+##
+("relationship"<|>COMPANY<|>U.S.<|>The company is affected by U.S. tariffs and trade measures<|>7)
+##
+("relationship"<|>COMPANY<|>REPORTABLE SEGMENT<|>The company reports net sales by reportable segment in the referenced table<|>6)
+<|COMPLETE|>
+#############################
+
+
+
+-Real Data-
+######################
+entity_types: [company, board of directors, audit committee, management, executive officer, government agency, regulatory body, court, legal proceeding, financial statement, reporting segment, product category, geographic region, stock exchange, security holder, accounting firm, tax authority, supplier, customer, contract, debt security, equity security, cybersecurity team]
+text: {input_text}
+######################
+output:
