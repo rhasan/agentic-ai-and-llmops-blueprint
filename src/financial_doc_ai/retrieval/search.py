@@ -27,8 +27,14 @@ class Citation(BaseModel):
 
 class SearchResult(BaseModel):
     text: str
-    distance: float
+    # Optional: the vector store returns a similarity distance, but graph
+    # retrieval has no per-passage score, so a graph result leaves this None.
+    distance: float | None = None
     citation: Citation
+    # Which retrieval source produced this passage. Lets a single downstream
+    # step (fusion, grounding, audit) stay source-agnostic while still
+    # deduping/attributing by origin. Graph passages set "graphrag".
+    source: str = "vector"
 
 
 # Chroma reserves these metadata keys for chunk-level attributes; everything else

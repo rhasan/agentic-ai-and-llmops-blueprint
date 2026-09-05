@@ -10,6 +10,7 @@ settings.yaml, so switching Ollama/Azure/Bedrock is one .env change.
 import asyncio
 import json
 import os
+from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
@@ -21,6 +22,24 @@ from financial_doc_ai.storage import ChunkStore
 
 DATA_ROOT = Path("/app/data")
 GRAPHRAG_ROOT = "/app/config/graphrag"  # holds settings.yaml (tracked config)
+
+
+@contextmanager
+def preserve_cwd():
+    """Restore the working directory on exit.
+
+    GraphRAG's `load_config` does an `os.chdir(root_dir)` and never restores it,
+    which silently leaks into the rest of the process (e.g. other code — or other
+    tests — resolving relative paths against the wrong dir). We wrap the GraphRAG
+    calls so the chdir lasts exactly as long as needed: indexing keeps it through
+    `build_index` (its prompt paths are relative to root_dir), query restores it
+    right after `load_config` (drift needs no relative-path reads).
+    """
+    prev = os.getcwd()
+    try:
+        yield
+    finally:
+        os.chdir(prev)
 
 
 def _split_model(spec: str) -> tuple[str, str]:
@@ -149,7 +168,10 @@ def build_graph_index() -> int:
     max_chunks_env = os.environ.get("GRAPHRAG_MAX_CHUNKS")
     max_chunks = int(max_chunks_env) if max_chunks_env else None
     df = build_documents_df(ChunkStore(DATA_ROOT), max_chunks=max_chunks)
-    config = load_config(root_dir=Path(GRAPHRAG_ROOT))
-    _configure_models(config)
-    asyncio.run(build_index(config, input_documents=df))
+    # Keep cwd = root_dir through build_index (relative indexing prompt paths),
+    # then restore it — load_config's chdir would otherwise leak process-wide.
+    with preserve_cwd():
+        config = load_config(root_dir=Path(GRAPHRAG_ROOT))
+        _configure_models(config)
+        asyncio.run(build_index(config, input_documents=df))
     return len(df)

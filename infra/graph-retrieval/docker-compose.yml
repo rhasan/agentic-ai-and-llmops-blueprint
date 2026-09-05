@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/graph-retrieval/Dockerfile
+    ports:
+      - "8002:8002"
+    volumes:
+      - ../..:/app
+      - /app/.venv
+    env_file:
+      - ../../.env
+    environment:
+      # Models + embedding dim come from .env (same wiring the offline index used,
+      # via _configure_models). The graph index parquets + LanceDB store are read
+      # from the bind-mounted output dir (GraphSearch defaults to
+      # /app/data/graphrag/output), so no extra path env is needed.
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8002"
+    networks:
+      - llm-net
+
+networks:
+  llm-net:
+    external: true

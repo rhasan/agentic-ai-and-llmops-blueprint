@@ -20,6 +20,7 @@ from financial_doc_ai.ingestion.graph_indexer import (
     _model_config,
     _split_model,
     build_documents_df,
+    preserve_cwd,
 )
 from financial_doc_ai.storage import ChunkStore
 
@@ -162,7 +163,10 @@ def test_configure_models_sets_embedding_dim(monkeypatch):
     monkeypatch.setenv("EMBEDDING_API_BASE", "http://ollama:11434")
     monkeypatch.setenv("EMBEDDING_DIM", "768")
 
-    config = load_config(root_dir=Path(GRAPHRAG_ROOT))
+    # load_config chdirs to root_dir; preserve_cwd keeps it from leaking into
+    # other tests (their relative cassette paths would resolve wrong otherwise).
+    with preserve_cwd():
+        config = load_config(root_dir=Path(GRAPHRAG_ROOT))
     assert config.vector_store.vector_size == 3072  # GraphRAG default before we set it
 
     _configure_models(config)
