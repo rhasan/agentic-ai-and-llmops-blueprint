@@ -20,6 +20,7 @@ from pydantic_ai.messages import ModelMessagesTypeAdapter
 from pydantic_ai.tools import ToolDenied
 
 from financial_doc_ai.serving.agent import build_agent
+from financial_doc_ai.serving.answer import AnswerBlock, CitedAnswer
 
 app = FastAPI(title="financial-doc-ai")
 
@@ -58,7 +59,12 @@ class AgentResponse(BaseModel):
     """Either the finished answer, or the calls held pending approval."""
 
     status: Literal["answered", "held"]
+    # Display text: the answer's blocks joined in order.
     answer: str | None = None
+    # The same answer, per attributable block. Each block's `chunk_ids` resolve to
+    # the original passages, so a client can offer click-through to source. An
+    # abstention is one block with no chunk_ids.
+    blocks: list[AnswerBlock] = []
     held: list[HeldCall] = []
     # Present only when held: the paused run's serialized state to send to /resume.
     message_history: Any | None = None
@@ -81,7 +87,13 @@ def _to_agent_response(result: Any) -> AgentResponse:
                 result.all_messages(), mode="json"
             ),
         )
-    return AgentResponse(status="answered", answer=output)
+    if isinstance(output, CitedAnswer):
+        return AgentResponse(
+            status="answered", answer=output.joined(), blocks=output.blocks
+        )
+    # Defensive: a plain-string output (e.g. a guardrail replacement that bypassed
+    # the answer contract) still returns as display text.
+    return AgentResponse(status="answered", answer=str(output))
 
 
 @app.get("/health")

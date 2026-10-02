@@ -10,7 +10,11 @@ after the code it exercises:
 - `graph_search.jsonl` — `graph_search` (DRIFT graph): cross-document / multi-hop
   question → provenance spans multiple filings / entities recovered.
 - `grounding.jsonl` — the post-loop grounding gate (`serving/grounding.py`):
-  (answer, passages) → `numbers_grounded` + judge verdict → allow / abstain.
+  (cited blocks, passages keyed by `chunk_id`) → a verdict per block → gate outcome
+  `allow` / `resynthesize` / `abstain`. Each block is checked against **only the
+  passages it cites**, cheapest check first: cited id was actually retrieved →
+  figures appear verbatim → LLM judge. Rows tagged `deterministic` need no model
+  call at all.
 - `agent.jsonl` — the agent loop end-to-end (`/agent/ask`): question → `answered`
   (grounded + cited) / `abstained` (grounding gate) / `held` (confirm gate).
 

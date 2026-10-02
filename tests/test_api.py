@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from pydantic_ai import DeferredToolRequests
 from pydantic_ai.messages import ModelResponse, ToolCallPart
 
+from financial_doc_ai.serving.answer import AnswerBlock, CitedAnswer
 from financial_doc_ai.serving.api import app, get_agent
 
 
@@ -60,7 +61,17 @@ class _FakeAgent:
             )
         # /agent/resume -> the decision came back; the loop finishes.
         self.resume_decisions = deferred_tool_results.approvals
-        return _FakeAgentResult("Apple faces risks including... [1]", [])
+        return _FakeAgentResult(
+            CitedAnswer(
+                blocks=[
+                    AnswerBlock(
+                        text="Apple's products may be affected by supply-chain disruptions.",
+                        chunk_ids=["0000320193-24-000106:47"],
+                    )
+                ]
+            ),
+            [],
+        )
 
 
 def _agent_client(fake):
@@ -105,5 +116,9 @@ def test_agent_resume_carries_decision_and_finishes():
     body = resp.json()
     assert body["status"] == "answered"
     assert body["answer"]
+    # The answer travels back per block, each carrying the citation a client needs
+    # to resolve the passage it came from.
+    assert body["blocks"][0]["chunk_ids"] == ["0000320193-24-000106:47"]
+    assert body["blocks"][0]["text"] in body["answer"]
     # The analyst's approval reached the loop as an approval for that exact call.
     assert fake.resume_decisions == {"call_1": True}

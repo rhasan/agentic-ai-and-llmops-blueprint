@@ -6,7 +6,7 @@ out. Query rewrite / company resolution / the confirmation gate all happen upstr
 in the orchestrator — not here. See docs/retrieval-and-serving.md.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 from financial_doc_ai.ingestion.embedder import Embedder
 from financial_doc_ai.query.rewriter import Filters
@@ -23,6 +23,22 @@ class Citation(BaseModel):
     version: str | None = None
     chunk_index: int | None = None
     headers: dict[str, str] = {}
+
+    @computed_field
+    @property
+    def chunk_id(self) -> str:
+        """The single opaque id an answer cites this passage by.
+
+        Derived, not stored, so it can never drift from its parts. It is the same
+        key the graph index carries as a text_unit's `document_id` and the same key
+        `ChunkStore` is indexed by — so one id resolves a passage back to its
+        original text regardless of which retrieval source returned it. Being a
+        computed field, it serializes into `model_dump()` and therefore reaches the
+        model in the MCP tool output.
+        """
+        if self.chunk_index is None:
+            return self.natural_id
+        return f"{self.natural_id}:{self.chunk_index}"
 
 
 class SearchResult(BaseModel):

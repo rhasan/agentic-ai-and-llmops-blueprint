@@ -65,8 +65,33 @@ Pair these contracts with **Apple's FY2025 10-K** (accession `0000320193-25-0000
 
 ---
 
-## How to Download & Store the Contracts
+## How the Contracts Are Stored
 
-1. Open each contract's **Filing Index Page** or **Direct Document URL** in your browser.
-2. Save the files locally (`Ctrl+S` → Save As HTML).
-3. Place them in `data/seed_contracts/` (or `data/raw/cuad/`) for ingestion by the storage layer into `RawStore`.
+The three contracts are already downloaded, as **PDFs**, in `data/raw/seed_contracts/AAPL/`:
+
+```
+component_purchase_agreement_ex10b19.pdf
+director_stock_plan_ex10-1.pdf
+rsu_award_agreement_ex10-2.pdf
+```
+
+**They are PDFs on purpose — do not replace them with HTML.** Per
+[initial-system-description.md](initial-system-description.md): *"Filings arrive via
+feed, contracts via **upload** (scanned ones go through **OCR**)."* Contracts model the
+**analyst-upload** path, where the input is an arbitrary PDF from the user, not a
+document fetched from a known structured source. These three files are the seed
+stand-in for that path.
+
+So the PDF format is the requirement, not an obstacle. Converting them to HTML to reuse
+the EDGAR parser would make the cross-document demo pass while leaving the
+upload/PDF/OCR path unbuilt — and would only work because these happen to be SEC
+exhibits with `.htm` equivalents, which a real uploaded contract would not have.
+
+> **Superseded instruction.** An earlier version of this section said to save the files
+> via `Ctrl+S → Save As HTML`. That was a manual bootstrap shortcut and contradicts the
+> upload design; it has caused at least one wrong recommendation. Ignore it.
+
+Ingestion for this path is **not built yet** (postponed 2026-10-02) — it needs a PDF
+extractor, OCR for scanned input, upload-supplied metadata and an upload trigger. See
+*Postponed: contract ingestion* in [work-in-progress.md](work-in-progress.md) for the
+open design questions.

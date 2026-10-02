@@ -20,6 +20,7 @@ from pydantic_ai import DeferredToolRequests
 
 from financial_doc_ai.prompts import SEED_DIR, load_manifest
 from financial_doc_ai.serving.agent import build_agent, resume
+from financial_doc_ai.serving.answer import CitedAnswer
 
 # Keep the real Azure resource name out of the committed cassette. Rewrite any
 # `*.openai.azure.com` host to a placeholder. vcrpy applies this filter both when
@@ -65,6 +66,7 @@ GRAPH_URL = "http://graph-retrieval-app-1:8002/mcp"
 _manifest = load_manifest()
 SEED_PROMPT = (SEED_DIR / _manifest["agent_orchestration"]["file"]).read_text(encoding="utf-8")
 JUDGE_PROMPT = (SEED_DIR / _manifest["grounding_judge"]["file"]).read_text(encoding="utf-8")
+SYNTHESIS_PROMPT = (SEED_DIR / _manifest["answer_synthesis"]["file"]).read_text(encoding="utf-8")
 
 
 def _build():
@@ -74,11 +76,12 @@ def _build():
         search_url=SEARCH_URL,
         graph_url=GRAPH_URL,
         grounding_instructions=JUDGE_PROMPT,
+        synthesis_instructions=SYNTHESIS_PROMPT,
     )
 
 
 def _run(question: str):
-    """Run to the first stop: either a prose answer (str) or a held approval."""
+    """Run to the first stop: either a CitedAnswer or a held approval."""
     agent = _build()
 
     async def go():
@@ -91,12 +94,14 @@ def _run(question: str):
 
 def test_agent_answers_single_document_question():
     # Apple resolves cleanly -> no confirmation -> the loop runs straight through
-    # to a cited prose answer.
+    # to a cited answer that survives the grounding gate.
     with my_vcr.use_cassette("agent_single_document.yaml"):
         answer = _run("What business risks did Apple describe in its 2024 10-K?")
-    assert isinstance(answer, str)
-    assert answer  # non-empty synthesized prose
-    assert "apple" in answer.lower() or "aapl" in answer.lower()
+    assert isinstance(answer, CitedAnswer)
+    assert answer.blocks
+    # Every block is attributed, which is what makes the answer checkable.
+    assert all(block.chunk_ids for block in answer.blocks)
+    assert answer.joined().strip()
 
 
 def test_unresolved_company_pauses_for_approval():
@@ -112,7 +117,7 @@ def test_unresolved_company_pauses_for_approval():
 def test_resume_after_approval_completes():
     # Approving a held call lets retrieval proceed. Each unresolved company search
     # is held on its own, so a client keeps approving until the run finishes — the
-    # loop here mirrors that and asserts it terminates in a prose answer (str).
+    # loop here mirrors that and asserts it terminates in a CitedAnswer.
     agent = _build()
 
     async def go():
@@ -131,5 +136,5 @@ def test_resume_after_approval_completes():
 
     with my_vcr.use_cassette("agent_resume_after_approval.yaml"):
         output = asyncio.run(go())
-    assert isinstance(output, str)
-    assert output
+    assert isinstance(output, CitedAnswer)
+    assert output.blocks

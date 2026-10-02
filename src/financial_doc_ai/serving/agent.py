@@ -30,6 +30,7 @@ from pydantic_ai_harness import OutputGuardrail
 from financial_doc_ai.prompts.registry import fetch_system_prompt
 from financial_doc_ai.query.resolver import CompanyResolver
 from financial_doc_ai.serving.agent_model import build_model
+from financial_doc_ai.serving.answer import CitedAnswer
 from financial_doc_ai.serving.grounding import build_grounding_guard
 
 # DRIFT graph search runs ~90-125s (primer + sequential follow-up LLM calls);
@@ -61,6 +62,7 @@ def build_agent(
     search_url: str | None = None,
     graph_url: str | None = None,
     grounding_instructions: str | None = None,  # judge prompt seam (tests)
+    synthesis_instructions: str | None = None,  # synthesis prompt seam (tests)
     judge_model_spec: str | None = None,
 ) -> Agent:
     search = MCPToolset(search_url or os.environ["SEARCH_MCP_URL"]).approval_required(
@@ -76,12 +78,18 @@ def build_agent(
     return Agent(
         build_model(model_spec),
         toolsets=[search, graph],
-        output_type=[str, DeferredToolRequests],
-        # Post-loop grounding gate: re-check the finished answer against the
-        # retrieved passages, abstain if anything isn't supported. See grounding.py.
+        # The answer is a list of independently-cited blocks, not prose: that is
+        # what lets the grounding gate check (and drop) one claim at a time rather
+        # than passing judgement on the whole answer. See serving/answer.py.
+        output_type=[CitedAnswer, DeferredToolRequests],
+        # Post-loop grounding gate: check each block against its own cited
+        # passages, drop what isn't supported, re-synthesize the rest, abstain if
+        # nothing survives. See grounding.py.
         capabilities=[
             OutputGuardrail(
-                guard=build_grounding_guard(judge_model, grounding_instructions)
+                guard=build_grounding_guard(
+                    judge_model, grounding_instructions, synthesis_instructions
+                )
             )
         ],
         instructions=(

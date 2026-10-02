@@ -23,3 +23,8 @@ file  = "agent_orchestration_system.md"
 name  = "grounding-judge-system"
 label = "production"
 file  = "grounding_judge_system.md"
+
+[answer_synthesis]
+name  = "answer-synthesis-system"
+label = "production"
+file  = "answer_synthesis_system.md"

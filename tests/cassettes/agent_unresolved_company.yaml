@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 07 Sep 2026 11:28:16 GMT
+      - Fri, 02 Oct 2026 20:52:38 GMT
       server:
       - uvicorn
     status:
@@ -69,7 +69,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 07 Sep 2026 11:28:16 GMT
+      - Fri, 02 Oct 2026 20:52:38 GMT
       server:
       - uvicorn
     status:
@@ -114,7 +114,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 07 Sep 2026 11:28:16 GMT
+      - Fri, 02 Oct 2026 20:52:38 GMT
       server:
       - uvicorn
     status:
@@ -169,7 +169,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 07 Sep 2026 11:28:16 GMT
+      - Fri, 02 Oct 2026 20:52:38 GMT
       server:
       - uvicorn
     status:
@@ -190,13 +190,30 @@ interactions:
       only when the question genuinely has multiple parts or spans documents.\\n2.
       ROUTE each retrieval to the tool whose description fits (see above). For `search_filings`,
       propose the metadata filters you can infer from the question (company, doc type,
-      period); omit what you cannot infer.\\n3. SYNTHESIZE one answer over the retrieved
-      passages.\\n\\nANSWER RULES:\\n1. GROUND EVERY CLAIM in retrieved passages.
-      Attribute inline with the source filing, e.g. \\\"(AAPL 2024 10-K)\\\".\\n2.
-      NO HALLUCINATION: if the retrieved passages do not support an answer, say so
-      in one sentence and stop. Do not guess.\\n3. STYLE: factual and concise. No
-      preamble.\"},{\"role\":\"user\",\"content\":\"What business risks did Tesla
-      describe in its 2024 10-K?\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
+      period); omit what you cannot infer.\\n3. STOP ON AN EMPTY CORPUS. If a retrieval
+      returns no passages, you may retry **once** with broadened filters. If it is
+      still empty, the corpus does not hold the document \u2014 say so and stop. Never
+      keep re-searching with new filter combinations.\\n4. SYNTHESIZE one answer over
+      the retrieved passages.\\n\\nANSWER FORMAT:\\nReturn the answer as a list of
+      BLOCKS. Each block is one statement plus the `chunk_ids` of the passages supporting
+      it.\\n\\n1. SELF-CONTAINED: every block must stand on its own. Do not write
+      \\\"this\\\", \\\"it also\\\", \\\"as noted above\\\", or anything that depends
+      on another block \u2014 any block may be removed, and the rest must still read
+      correctly. Repeat the subject instead of referring back.\\n2. CITE BY `chunk_id`:
+      copy the `chunk_id` values verbatim from the `citation` of the passages you
+      actually used for that block. At least one per block. Never invent one, and
+      never cite a passage you did not use for that statement.\\n3. NO INLINE CITATIONS:
+      put no citation markers, bracketed numbers, or filing names in the block text
+      \u2014 attribution lives in `chunk_ids`. Write \\\"Total net sales were $391,035
+      million in fiscal 2024.\\\", not \\\"... (AAPL 2024 10-K)\\\".\\n4. ONE CLAIM
+      PER BLOCK: split distinct facts into distinct blocks so each can be verified
+      on its own. Group sentences in one block only when they share the same supporting
+      passages and read as a unit.\\n\\nANSWER RULES:\\n1. GROUND EVERY STATEMENT
+      in retrieved passages. Figures must appear in the cited passage exactly as you
+      write them.\\n2. NO HALLUCINATION: if the retrieved passages do not support
+      an answer, return a single block saying so, with no `chunk_ids`. Do not guess.\\n3.
+      STYLE: factual and concise. No preamble.\"},{\"role\":\"user\",\"content\":\"What
+      business risks did Tesla describe in its 2024 10-K?\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"required\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
       search over indexed filings, filtered by document metadata.\\n\\n    Filters
       must be already-resolved, canonical values matching the stamped\\n    corpus:
       `company` = ticker (e.g. \\\"AAPL\\\"), `doc_type` = form (e.g. \\\"10-K\\\"),\\n
@@ -209,7 +226,16 @@ interactions:
       and returns a synthesized sub-answer plus the supporting passages\\n    (each
       with citation metadata). Prefer this over passage search when the\\n    question
       spans multiple documents or needs entities/relationships connected.\\n    Unlike
-      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}}]}"
+      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}},{\"type\":\"function\",\"function\":{\"name\":\"final_result\",\"description\":\"The
+      agent's final answer: ordered blocks, each independently attributable.\\n\\nRendered
+      to the reader as its blocks joined in order, so it reads as prose while\\nstaying
+      checkable and attributable block by block.\",\"parameters\":{\"properties\":{\"blocks\":{\"items\":{\"$ref\":\"#/$defs/AnswerBlock\"},\"type\":\"array\"}},\"required\":[\"blocks\"],\"type\":\"object\",\"additionalProperties\":false,\"$defs\":{\"AnswerBlock\":{\"description\":\"One
+      self-contained statement plus the passages that support it.\",\"properties\":{\"text\":{\"description\":\"One
+      self-contained statement. It must stand on its own: no 'this', 'it also', or
+      references to another block, since any block may be dropped. Plain prose \u2014
+      no inline citation markers or filing names.\",\"type\":\"string\"},\"chunk_ids\":{\"description\":\"The
+      chunk_id of every retrieved passage that supports this statement. Copy them
+      verbatim from the citation of the passages you used. At least one.\",\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"text\",\"chunk_ids\"],\"type\":\"object\",\"additionalProperties\":false}}},\"strict\":true}}]}"
     headers:
       accept:
       - application/json
@@ -218,7 +244,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '3401'
+      - '5874'
       content-type:
       - application/json
       host:
@@ -247,33 +273,36 @@ interactions:
     uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
   response:
     body:
-      string: '{"choices":[{"content_filter_result":{"error":{"code":"content_filter_error","message":"The
-        contents are not filtered"}},"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{}},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"query\":\"business
-        risks described in the filing; risk factors; business risks\", \"company\":[\"TSLA\"],
-        \"doc_type\":[\"10-K\"], \"period\":[\"2024\"], \"version\":\"current\", \"top_k\":5}","name":"search_filings"},"id":"call_YcTGXvm9ADfYGKikkdAKLZyZ","type":"function"}]}}],"created":1788780497,"id":"chatcmpl-ELRoHpsekgvMrgQ5JrN8cLMlZ9Lpv","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20260826075037-2deccc7a-default-r2-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":60,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":4,"engine_ttft_ms":33,"engine_ttlt_ms":286,"pre_inference_ms":138,"service_tbt_ms":4,"service_ttft_ms":417,"service_ttlt_ms":636,"user_visible_ttft_ms":279},"prompt_tokens":720,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":780}}
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"query\":\"business
+        risks described in the 2024 10-K\", \"company\":[\"TSLA\"], \"doc_type\":[\"10-K\"],
+        \"period\":[\"2024\"], \"version\":\"current\", \"top_k\":10}","name":"search_filings"},"id":"call_l9EWhVjEqSHwnHbJLCDAbl1e","type":"function"}]}}],"created":1790974359,"id":"chatcmpl-EUeX9OYrFpX2Xhp4B8Q5dt1CTNmrI","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20260819144839-a54ac9ed-default-r1-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":58,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":6,"engine_ttft_ms":57,"engine_ttlt_ms":385,"pre_inference_ms":115,"service_tbt_ms":6,"service_ttft_ms":376,"service_ttlt_ms":701,"user_visible_ttft_ms":262},"prompt_tokens":1177,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":1235}}
 
         '
     headers:
       apim-request-id:
-      - 9f688e9c-e3ca-475c-be54-11e8bcdd1ffe
+      - 638a8612-bd8e-4ab1-ba9e-e7bdd5e844c7
       azureai-fe-is-streaming:
       - 'False'
       azureai-fe-offer-type:
       - paygo
       azureml-model-session:
-      - d20260826075037-2deccc7a
+      - d20260819144839-a54ac9ed
       content-length:
-      - '1942'
+      - '2183'
       content-type:
       - application/json
       date:
-      - Mon, 07 Sep 2026 11:28:17 GMT
+      - Fri, 02 Oct 2026 20:52:38 GMT
       server:
       - istio-envoy
       skip-error-remapping:
       - 'true'
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
       x-accel-buffering:
       - 'no'
       x-content-type-options:
@@ -297,7 +326,7 @@ interactions:
       x-ratelimit-remaining-requests:
       - '14999'
       x-ratelimit-remaining-tokens:
-      - '14999280'
+      - '14998823'
       x-ratelimit-renewalperiod-requests:
       - '60'
       x-ratelimit-renewalperiod-tokens:
@@ -307,7 +336,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - '0'
       x-request-id:
-      - fe219c09-a6ca-41ba-9934-7f04265e8505
+      - e7f215a5-b1dc-4ba0-a6b5-06fb776651bd
     status:
       code: 200
       message: OK

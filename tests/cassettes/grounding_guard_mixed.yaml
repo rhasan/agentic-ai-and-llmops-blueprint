@@ -1,0 +1,632 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"system","content":"You are a grounding checker for
+      a financial-filings Q&A system. You are given one STATEMENT and the PASSAGES
+      that were cited to support it. Decide whether those passages support that statement.\n\nRULES:\n-
+      Judge against the PASSAGES ONLY. Do not use outside knowledge. A statement that
+      is true in the real world but absent from the passages is NOT supported.\n-
+      Supported means the passages state it or directly entail it. Paraphrase and
+      summary are fine; unstated inference, added detail, or a changed meaning are
+      not.\n- Numbers, dates and named entities must match the passages exactly. A
+      figure that does not appear in the passages is not supported.\n- Judge only
+      what the statement asserts. Do not speculate about what it implies or what a
+      reader might infer.\n- A statement that merely declines to answer (\"the documents
+      do not say ...\") with no factual assertion is supported.\n\nReply with `supported`
+      (true/false) and a one-line `reason` citing the passage wording that supports
+      it, or naming what is missing."},{"role":"user","content":"STATEMENT:\nTotal
+      net sales were $391,035 million in fiscal 2024.\n\nPASSAGES:\nTotal net sales
+      were $391,035 million in fiscal 2024, compared to $383,285 million in 2023."}],"model":"gpt-5.4-mini","stream":false,"tool_choice":"required","tools":[{"type":"function","function":{"name":"final_result","description":"The
+      judge''s structured reply for a single block.","parameters":{"properties":{"supported":{"type":"boolean"},"reason":{"type":"string"}},"required":["supported","reason"],"type":"object","additionalProperties":false},"strict":true}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '1640'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"supported\":true,\"reason\":\"The
+        passage states, \\\"Total net sales were $391,035 million in fiscal 2024,\\\"
+        exactly matching the statement.\"}","name":"final_result"},"id":"call_EqNeLXsH5zALji5ZmwVAQ0ag","type":"function"}]}}],"created":1790974631,"id":"chatcmpl-EUebXGmXTs8c5yn3cSLjYV6lKHoxZ","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20261001013608-2e96cd0a-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":45,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":7,"engine_ttft_ms":61,"engine_ttlt_ms":389,"pre_inference_ms":98,"service_tbt_ms":7,"service_ttft_ms":245,"service_ttlt_ms":557,"user_visible_ttft_ms":147},"prompt_tokens":393,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":438}}
+
+        '
+    headers:
+      apim-request-id:
+      - 2c2a14cb-a1ba-4d52-b807-f1cb97cfbdca
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20261001013608-2e96cd0a
+      content-length:
+      - '2159'
+      content-type:
+      - application/json
+      date:
+      - Fri, 02 Oct 2026 20:57:10 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999607'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 90f2e649-0edc-4343-98d6-bdc8f223c4b7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"role":"system","content":"You are a grounding checker for
+      a financial-filings Q&A system. You are given one STATEMENT and the PASSAGES
+      that were cited to support it. Decide whether those passages support that statement.\n\nRULES:\n-
+      Judge against the PASSAGES ONLY. Do not use outside knowledge. A statement that
+      is true in the real world but absent from the passages is NOT supported.\n-
+      Supported means the passages state it or directly entail it. Paraphrase and
+      summary are fine; unstated inference, added detail, or a changed meaning are
+      not.\n- Numbers, dates and named entities must match the passages exactly. A
+      figure that does not appear in the passages is not supported.\n- Judge only
+      what the statement asserts. Do not speculate about what it implies or what a
+      reader might infer.\n- A statement that merely declines to answer (\"the documents
+      do not say ...\") with no factual assertion is supported.\n\nReply with `supported`
+      (true/false) and a one-line `reason` citing the passage wording that supports
+      it, or naming what is missing."},{"role":"user","content":"STATEMENT:\nApple''s
+      products and services may be affected by supply-chain disruptions and component
+      shortages.\n\nPASSAGES:\nApple Inc.''s products and services may be affected
+      by supply-chain disruptions and component shortages."}],"model":"gpt-5.4-mini","stream":false,"tool_choice":"required","tools":[{"type":"function","function":{"name":"final_result","description":"The
+      judge''s structured reply for a single block.","parameters":{"properties":{"supported":{"type":"boolean"},"reason":{"type":"string"}},"required":["supported","reason"],"type":"object","additionalProperties":false},"strict":true}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '1697'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"supported\":true,\"reason\":\"The
+        passage states, \\\"Apple Inc.''s products and services may be affected by
+        supply-chain disruptions and component shortages,\\\" which directly supports
+        the statement.\"}","name":"final_result"},"id":"call_pMAok9Yi4U1BG4pINNGxhDuW","type":"function"}]}}],"created":1790974631,"id":"chatcmpl-EUebXODo3BuLf8pZfY1eT0ggrb7Gy","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20261001211550-183b4590-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":49,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":4,"engine_ttft_ms":45,"engine_ttlt_ms":222,"pre_inference_ms":160,"service_tbt_ms":3,"service_ttft_ms":395,"service_ttlt_ms":566,"user_visible_ttft_ms":235},"prompt_tokens":385,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":434}}
+
+        '
+    headers:
+      apim-request-id:
+      - 182deab0-a71d-42fa-95df-95f4aa15dd28
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20261001211550-183b4590
+      content-length:
+      - '2217'
+      content-type:
+      - application/json
+      date:
+      - Fri, 02 Oct 2026 20:57:10 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999615'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - c73f3874-25a0-4bac-8412-27f00ba63064
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"You rewrite a verified
+      answer so it reads well. You are given GROUNDED BLOCKS \u2014 statements that
+      have already been checked against their source passages, each with the `chunk_ids`
+      that support it. Some blocks were removed before you saw them, so the input
+      may read as disconnected.\\n\\nYour job is presentation only.\\n\\nRULES:\\n1.
+      ADD NOTHING. Every fact, figure, name and date in your output must already appear
+      in the input blocks. Do not add context, conclusions, comparisons, trends, caveats
+      or transitions that assert anything. If the input does not say it, you cannot
+      say it.\\n2. CARRY CITATIONS THROUGH. Each output block keeps the `chunk_ids`
+      of the input block(s) its content came from. If you merge two input blocks,
+      the output block carries both sets. Never drop, swap or invent a `chunk_id`.\\n3.
+      KEEP BLOCKS SELF-CONTAINED. Each output block must stand alone \u2014 no \\\"this\\\",
+      \\\"it also\\\", or references to another block. Repeat the subject instead
+      of referring back.\\n4. YOU MAY: reorder blocks into a sensible sequence, merge
+      blocks that share the same `chunk_ids` and read as one idea, and tighten wording.\\n5.
+      YOU MAY NOT: change what a statement claims, generalise it, soften it, strengthen
+      it, or combine two facts into a new one.\\n6. NO INLINE CITATIONS in the text,
+      and no preamble such as \\\"Based on the passages\\\".\\n\\nYour output is re-checked
+      against the same passages. Anything you add that is not supported will cause
+      the whole answer to be refused, so add nothing.\"},{\"role\":\"user\",\"content\":\"GROUNDED
+      BLOCKS:\\n[block 0] cites=['0000320193-24-000106:12']\\nTotal net sales were
+      $391,035 million in fiscal 2024.\\n\\n[block 1] cites=['0000320193-24-000106:47']\\nApple's
+      products and services may be affected by supply-chain disruptions and component
+      shortages.\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"required\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"final_result\",\"description\":\"The
+      agent's final answer: ordered blocks, each independently attributable.\\n\\nRendered
+      to the reader as its blocks joined in order, so it reads as prose while\\nstaying
+      checkable and attributable block by block.\",\"parameters\":{\"properties\":{\"blocks\":{\"items\":{\"$ref\":\"#/$defs/AnswerBlock\"},\"type\":\"array\"}},\"required\":[\"blocks\"],\"type\":\"object\",\"additionalProperties\":false,\"$defs\":{\"AnswerBlock\":{\"description\":\"One
+      self-contained statement plus the passages that support it.\",\"properties\":{\"text\":{\"description\":\"One
+      self-contained statement. It must stand on its own: no 'this', 'it also', or
+      references to another block, since any block may be dropped. Plain prose \u2014
+      no inline citation markers or filing names.\",\"type\":\"string\"},\"chunk_ids\":{\"description\":\"The
+      chunk_id of every retrieved passage that supports this statement. Copy them
+      verbatim from the citation of the passages you used. At least one.\",\"items\":{\"type\":\"string\"},\"type\":\"array\"}},\"required\":[\"text\",\"chunk_ids\"],\"type\":\"object\",\"additionalProperties\":false}}},\"strict\":true}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '3016'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"blocks\":[{\"text\":\"Total
+        net sales were $391,035 million in fiscal 2024.\",\"chunk_ids\":[\"0000320193-24-000106:12\"]},{\"text\":\"Apple''s
+        products and services may be affected by supply-chain disruptions and component
+        shortages.\",\"chunk_ids\":[\"0000320193-24-000106:47\"]}]}","name":"final_result"},"id":"call_giQe5EVjwfOmS2GaFKnA1lFY","type":"function"}]}}],"created":1790974633,"id":"chatcmpl-EUebZU1SYBBg8fYfwAlvPEnWRe0nE","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20260929194816-509880d2-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":84,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":4,"engine_ttft_ms":26,"engine_ttlt_ms":336,"pre_inference_ms":267,"service_tbt_ms":4,"service_ttft_ms":575,"service_ttlt_ms":881,"user_visible_ttft_ms":308},"prompt_tokens":668,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":752}}
+
+        '
+    headers:
+      apim-request-id:
+      - 22bd9a5a-7867-4a14-8988-8c4b0b784b93
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20260929194816-509880d2
+      content-length:
+      - '2296'
+      content-type:
+      - application/json
+      date:
+      - Fri, 02 Oct 2026 20:57:12 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999332'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 38e91fba-7d8d-4d6c-97b2-a026d8b3a4ea
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"role":"system","content":"You are a grounding checker for
+      a financial-filings Q&A system. You are given one STATEMENT and the PASSAGES
+      that were cited to support it. Decide whether those passages support that statement.\n\nRULES:\n-
+      Judge against the PASSAGES ONLY. Do not use outside knowledge. A statement that
+      is true in the real world but absent from the passages is NOT supported.\n-
+      Supported means the passages state it or directly entail it. Paraphrase and
+      summary are fine; unstated inference, added detail, or a changed meaning are
+      not.\n- Numbers, dates and named entities must match the passages exactly. A
+      figure that does not appear in the passages is not supported.\n- Judge only
+      what the statement asserts. Do not speculate about what it implies or what a
+      reader might infer.\n- A statement that merely declines to answer (\"the documents
+      do not say ...\") with no factual assertion is supported.\n\nReply with `supported`
+      (true/false) and a one-line `reason` citing the passage wording that supports
+      it, or naming what is missing."},{"role":"user","content":"STATEMENT:\nTotal
+      net sales were $391,035 million in fiscal 2024.\n\nPASSAGES:\nTotal net sales
+      were $391,035 million in fiscal 2024, compared to $383,285 million in 2023."}],"model":"gpt-5.4-mini","stream":false,"tool_choice":"required","tools":[{"type":"function","function":{"name":"final_result","description":"The
+      judge''s structured reply for a single block.","parameters":{"properties":{"supported":{"type":"boolean"},"reason":{"type":"string"}},"required":["supported","reason"],"type":"object","additionalProperties":false},"strict":true}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '1640'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"supported\":true,\"reason\":\"The
+        passage states, \\\"Total net sales were $391,035 million in fiscal 2024,\\\"
+        which exactly matches the statement.\"}","name":"final_result"},"id":"call_3jtukjS3WbXm3gePKHNxdP4F","type":"function"}]}}],"created":1790974634,"id":"chatcmpl-EUebafmZPJk77WPAS1zlEXOhGdHOk","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20261001013608-2e96cd0a-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":46,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":5,"engine_ttft_ms":46,"engine_ttlt_ms":278,"pre_inference_ms":102,"service_tbt_ms":5,"service_ttft_ms":221,"service_ttlt_ms":449,"user_visible_ttft_ms":119},"prompt_tokens":393,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":439}}
+
+        '
+    headers:
+      apim-request-id:
+      - 44eb1c90-b260-43da-8e31-1843147793c9
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20261001013608-2e96cd0a
+      content-length:
+      - '2165'
+      content-type:
+      - application/json
+      date:
+      - Fri, 02 Oct 2026 20:57:13 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999607'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 5364ee3e-e3b1-42f6-8352-58c36006201c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"role":"system","content":"You are a grounding checker for
+      a financial-filings Q&A system. You are given one STATEMENT and the PASSAGES
+      that were cited to support it. Decide whether those passages support that statement.\n\nRULES:\n-
+      Judge against the PASSAGES ONLY. Do not use outside knowledge. A statement that
+      is true in the real world but absent from the passages is NOT supported.\n-
+      Supported means the passages state it or directly entail it. Paraphrase and
+      summary are fine; unstated inference, added detail, or a changed meaning are
+      not.\n- Numbers, dates and named entities must match the passages exactly. A
+      figure that does not appear in the passages is not supported.\n- Judge only
+      what the statement asserts. Do not speculate about what it implies or what a
+      reader might infer.\n- A statement that merely declines to answer (\"the documents
+      do not say ...\") with no factual assertion is supported.\n\nReply with `supported`
+      (true/false) and a one-line `reason` citing the passage wording that supports
+      it, or naming what is missing."},{"role":"user","content":"STATEMENT:\nApple''s
+      products and services may be affected by supply-chain disruptions and component
+      shortages.\n\nPASSAGES:\nApple Inc.''s products and services may be affected
+      by supply-chain disruptions and component shortages."}],"model":"gpt-5.4-mini","stream":false,"tool_choice":"required","tools":[{"type":"function","function":{"name":"final_result","description":"The
+      judge''s structured reply for a single block.","parameters":{"properties":{"supported":{"type":"boolean"},"reason":{"type":"string"}},"required":["supported","reason"],"type":"object","additionalProperties":false},"strict":true}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '1697'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"supported\":true,\"reason\":\"The
+        passage states, \\\"Apple Inc.''s products and services may be affected by
+        supply-chain disruptions and component shortages,\\\" which matches the statement.\"}","name":"final_result"},"id":"call_rG0kMR32IEnwUwpiREVGR29c","type":"function"}]}}],"created":1790974635,"id":"chatcmpl-EUebbk0aS4y3LEwXa6yRxo3ocK3UR","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"404","message":"Safety
+        Provider is currently not available in this region."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20261001013608-2e96cd0a-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":48,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":5,"engine_ttft_ms":48,"engine_ttlt_ms":297,"pre_inference_ms":290,"service_tbt_ms":5,"service_ttft_ms":592,"service_ttlt_ms":832,"user_visible_ttft_ms":303},"prompt_tokens":385,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":433}}
+
+        '
+    headers:
+      apim-request-id:
+      - 45c5c530-b07e-422d-b647-bd6fd2e6d413
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20261001013608-2e96cd0a
+      content-length:
+      - '2207'
+      content-type:
+      - application/json
+      date:
+      - Fri, 02 Oct 2026 20:57:14 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Origin
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999615'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 7b8cd982-e58f-4153-88f2-73412a2a9cc6
+    status:
+      code: 200
+      message: OK
+version: 1

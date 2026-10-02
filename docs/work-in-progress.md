@@ -78,13 +78,31 @@ See [contracts-storyline.md](contracts-storyline.md) for full context, 10-K sect
 
 ## Next session — pick up here
 
-**State (2026-10-02):** the agentic online path is functionally complete end to end — vector + graph retrieval as MCP tools, a PydanticAI agent loop over both, a HITL confirm gate, and a post-loop grounding gate, behind `/agent/ask` + `/agent/resume`. **76 tests pass offline.** Steps 23–26 are **code-complete but uncommitted**.
+**State (2026-10-02):** the agentic online path is functionally complete end to end — vector + graph retrieval as MCP tools, a PydanticAI agent loop over both, a HITL confirm gate, and a post-loop grounding gate, behind `/agent/ask` + `/agent/resume`. **76 tests pass offline.** Steps 23–26 committed in `bb40d8c`.
 
-### Immediate
+### Build order (decided 2026-10-02)
 
-1. **Commit steps 23–26** (agent loop, grounding gate, API rewiring + orchestrator removal, eval restructure). Checked clean: `.env` is gitignored/untracked, cassettes have the Azure hostname scrubbed to `fake-resource.openai.azure.com` and `authorization`/`api-key` headers stripped.
-2. **Eval harness** — the highest-value next build. Five component datasets exist (`evals/*.jsonl`) and **nothing consumes them**. Start with the deterministic ones (resolver exact-match, grounding's number check), then retrieval recall@k, then the LLM-judge sets. This is the gate that makes every later change measurable. See [evaluation-strategy.md](evaluation-strategy.md).
-3. **CI** — there is no `.github/workflows/` at all. Once the harness exists, wire pytest + the deterministic evals into GitHub Actions as an eval-in-CI gate (a named blueprint area, currently 0%).
+A plain-English tour of the whole system — ingestion, the agent path, MCP, the API, with diagrams — is in **[system-overview.md](specs/system-overview.md)**. Read that first if returning after a break.
+
+1. **Grounding fix** ← **next**. Replace the arbitrary 80%-of-claims threshold with something principled. Root cause: the LLM judge does two jobs — *segment* the answer into claims and *verify* each — and only segmentation is unreliable (it extracts attribution and framing sentences as claims, sometimes invents one). The threshold tolerates that noise but introduces a real safety regression: a 20-claim answer now passes with 4 fabricated claims, inverting the project's own priority (*correct citation > abstaining > completeness*, [initial-system-description.md](initial-system-description.md)). Likely direction: take segmentation away from the model (deterministic split, drop framing by rule) and restore a strict rule — optionally verifying **per citation** to match the spec's "matches the cited text" wording, which the current code diverges from (it grounds against the union of all retrieved passages). Doesn't need the harness: `evals/grounding.jsonl` has 7 rows with expected allow/abstain outcomes a plain pytest test can assert.
+
+2. **Tracing + monitoring** — the largest missing blueprint area; Phoenix is already running and idle. Would also make grounding behaviour visible (judge verdicts per run, abstention rate over time) rather than found by chance.
+
+3. **Eval harness** — **deliberately last.** The five component datasets in `evals/` exist and nothing consumes them. Deferred by choice (2026-10-02).
+
+**CI** follows the harness — there is no `.github/workflows/` at all, and little to gate on before the harness exists.
+
+### Postponed: contract ingestion (2026-10-02)
+
+Deferred as too large for now — **not** low-value. It is what makes the cross-document storyline demonstrable.
+
+Postponed once its real size became clear: **contracts are not a second file format, they are a second ingestion path with a different trigger.** [initial-system-description.md](initial-system-description.md) is the authority — *"Filings arrive via feed, contracts via upload (scanned ones go through OCR)."* The intended shape is an analyst uploading an arbitrary PDF, which is why the three seed files in `data/raw/seed_contracts/AAPL/` are PDFs and **should stay PDFs**. Re-downloading the EDGAR `.htm` versions would make the demo pass while silently deleting the upload/PDF/OCR requirement — and would only be cheap because the corpus is 3 files and these happen to be SEC exhibits, neither of which holds for a real uploaded contract.
+
+Open design questions, by weight: metadata provenance (an upload supplies none of the four stamped filter fields — analyst-typed, LLM-extracted, or extract-then-confirm); document identity (`natural_id` has no stable source id; a re-uploaded revision is the first real case for the storage layer's `version`/supersession rule); **PDF structure** (the hard one — heading-path injection depends on HTML heading tags, and a PDF has none; contracts are structured typographically, so either reconstruct hierarchy from layout à la `unstructured`, recover section numbering by pattern, or accept worse retrieval for contract chunks); OCR for scanned PDFs; **graph re-index cost** (`graph_index` is a full rebuild every run, so naively every upload re-indexes the whole corpus — vectors should update per-document, graph on a schedule); and how far "upload" goes (no endpoint exists; range is a bare `POST /documents` through to validation, size limits, OCR fallback and progress reporting).
+
+Start by extracting the three PDFs and **looking at the output** — the PDF-structure answer determines most of the rest. Eval rows `graph-006`, `agent-012`, `retr-007` flip positive when this lands.
+
+⚠️ [contracts-storyline.md](contracts-storyline.md)'s "How to Download & Store" section describes a manual HTML bootstrap that **contradicts** this design. Follow the system description, not that section.
 
 ### Known issues
 
