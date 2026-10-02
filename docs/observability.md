@@ -38,15 +38,40 @@ Prompts are versioned in Phoenix and fetched at runtime by label.
 |---|---|
 | `seed/prompts/manifest.toml` | Declares each prompt: logical key → `name`, `label`, `file`. Adding a prompt = one entry + one `.md`. |
 | `seed/prompts/*.md` | Canonical seed text. Bootstrap for a fresh Phoenix and the runtime fallback. |
-| `prompts/seed.py` | Idempotent, manifest-driven: registers each prompt if absent, tags the version with its label. |
-| `prompts.py` | Registry access: `load_manifest()`, `fetch_system_prompt(key)` (fetch the version at the label; fall back to the seed file if Phoenix is unreachable). |
-| consumer (`QueryRewriter`) | Fetches its prompt at init and caches it. `system_prompt` injection seam lets tests skip Phoenix. |
+| `prompts/seed.py` | **Push** (bootstrap): idempotent, manifest-driven — registers each prompt *if absent* and tags the version with its label. Skips anything already in Phoenix, so it never overwrites a UI edit. |
+| `prompts/pull.py` | **Pull** (sync back): reads the version at each label and writes it over the seed file. Run after a UI edit so the fallback stops being stale and the change lands in git. |
+| `prompts/registry.py` | Registry access: `load_manifest()`, `fetch_system_prompt(key)` (fetch the version at the label; fall back to the seed file if Phoenix is unreachable). |
+| consumers (agent, grounding judge, synthesis) | Fetch the prompt at build time. Each has an `instructions` injection seam so tests skip Phoenix. |
 
 Rules:
-- **Source of truth is Phoenix** after seeding. The seed file is the bootstrap and fallback, not a live mirror — it goes stale once the prompt is edited in the UI.
+- **Source of truth is Phoenix** after seeding. The seed files are the bootstrap and the runtime fallback.
 - **The label is a movable pointer.** A UI edit creates a new version; moving the `production` label onto it makes it live. The app follows the label; it does not pin a version.
-- **Fetch once at init + cache.** A UI change is picked up on the next app start.
+- **Fetch once at build + cache.** A UI change is picked up on the next app start (or container recreate).
 - **Config split:** only `PHOENIX_ENDPOINT` is in `.env`; prompt name/label live in the manifest next to the text they describe.
+
+### Keeping the seed files in sync
+
+The seed files are not a live mirror, and a stale one is quietly dangerous: if Phoenix
+is unreachable the app keeps serving, using the old text from disk. So after editing a
+prompt in the UI, pull it back down:
+
+```bash
+docker compose -f infra/serving/docker-compose.yml run --rm --no-deps -T app \
+    uv run python -m financial_doc_ai.prompts.pull
+git diff seed/prompts/     # shows exactly what changed in the UI
+```
+
+Then commit, so prompt changes are reviewable like any other change.
+
+```
+  edit in Phoenix UI  ──→  pull  ──→  git diff  ──→  commit
+  (Phoenix wins)                                     (fallback + history stay honest)
+```
+
+The two directions are deliberately asymmetric: `seed` only ever *creates*, so it
+cannot clobber a UI edit; `pull` is the only thing that writes to the files. A prompt
+added in git reaches Phoenix via `seed`; a prompt changed in the UI reaches git via
+`pull`.
 
 ## Alternatives considered
 
