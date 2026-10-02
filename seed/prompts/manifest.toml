@@ -13,3 +13,13 @@ file  = "query_rewrite_system.md"
 name  = "answer-generation-system"
 label = "production"
 file  = "answer_generation_system.md"
+
+[agent_orchestration]
+name  = "agent-orchestration-system"
+label = "production"
+file  = "agent_orchestration_system.md"
+
+[grounding_judge]
+name  = "grounding-judge-system"
+label = "production"
+file  = "grounding_judge_system.md"

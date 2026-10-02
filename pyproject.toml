@@ -23,6 +23,8 @@ dependencies = [
     "markdownify>=1.2.3",
     "mcp>=2.1.0",
     "tenacity>=9.1.4",
+    "pydantic-ai>=2.31.1",
+    "pydantic-ai-harness>=0.24.0",
 ]
 
 [project.scripts]

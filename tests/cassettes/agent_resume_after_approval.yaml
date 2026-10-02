@@ -1,0 +1,1135 @@
+interactions:
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '333'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:34 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '331'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:35 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Semantic
+        search over indexed filings, filtered by document metadata.\n\n    Filters
+        must be already-resolved, canonical values matching the stamped\n    corpus:
+        `company` = ticker (e.g. \"AAPL\"), `doc_type` = form (e.g. \"10-K\"),\n    `period`
+        = fiscal year (e.g. \"2024\"), `version` = \"current\". Returns the most\n    relevant
+        passages, each with the citation metadata needed to attribute it.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"company":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Period"},"version":{"default":"current","title":"Version","type":"string"},"top_k":{"default":5,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"search_filingsArguments"},"name":"search_filings","outputSchema":{"properties":{"result":{"items":{"additionalProperties":true,"type":"object"},"title":"Result","type":"array"}},"required":["result"],"title":"search_filingsOutput","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '1433'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:34 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Graph-based
+        retrieval for cross-document and multi-hop questions.\n\n    Runs a DRIFT
+        search over the knowledge graph built from the filings \u2014\n    following
+        relationships across documents rather than matching a single\n    passage
+        \u2014 and returns a synthesized sub-answer plus the supporting passages\n    (each
+        with citation metadata). Prefer this over passage search when the\n    question
+        spans multiple documents or needs entities/relationships connected.\n    Unlike
+        `search_filings` it is not filtered by document metadata.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"top_k":{"default":10,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"graph_searchArguments"},"name":"graph_search","outputSchema":{"$defs":{"Citation":{"description":"What
+        makes a returned passage citable \u2014 the stamped provenance fields.","properties":{"natural_id":{"title":"Natural
+        Id","type":"string"},"company":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Period"},"version":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Version"},"chunk_index":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Chunk
+        Index"},"headers":{"additionalProperties":{"type":"string"},"default":{},"title":"Headers","type":"object"}},"required":["natural_id"],"title":"Citation","type":"object"},"GeneratedAnswer":{"properties":{"answer":{"title":"Answer","type":"string"},"citations":{"default":[],"items":{"type":"integer"},"title":"Citations","type":"array"},"can_answer":{"title":"Can
+        Answer","type":"boolean"}},"required":["answer","can_answer"],"title":"GeneratedAnswer","type":"object"},"SearchResult":{"properties":{"text":{"title":"Text","type":"string"},"distance":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Distance"},"citation":{"$ref":"#/$defs/Citation"},"source":{"default":"vector","title":"Source","type":"string"}},"required":["text","citation"],"title":"SearchResult","type":"object"}},"description":"A
+        graph sub-answer plus the passages it was built from.\n\nSymmetric with the
+        vector side (GeneratedAnswer over a list of SearchResult),\nso fusion can
+        treat both sources the same. DRIFT already writes a cited prose\nanswer, so
+        `sub_answer` wraps that directly; `results` carry our chunk ids for\ndedup/attribution.","properties":{"sub_answer":{"$ref":"#/$defs/GeneratedAnswer"},"results":{"items":{"$ref":"#/$defs/SearchResult"},"title":"Results","type":"array"}},"required":["sub_answer","results"],"title":"GraphAnswer","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '2963'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:35 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"You are a financial-filings
+      research agent. You answer questions about companies' SEC filings by retrieving
+      evidence with tools and synthesizing a cited answer. Use ONLY what the tools
+      return \u2014 never outside knowledge.\\n\\nTOOLS:\\n- `search_filings` \u2014
+      passage search within specific filings, filtered by metadata (company, doc type,
+      period). Use for direct, single-document lookups (\\\"What was AAPL's 2024 revenue?\\\").\\n-
+      `graph_search` \u2014 cross-document, multi-hop retrieval over the knowledge
+      graph. Use when the question spans multiple filings or needs entities/relationships
+      connected (\\\"How has Apple's supply-chain risk language evolved across years?\\\").
+      It is not filtered by metadata.\\n\\nPROCESS:\\n1. DECOMPOSE only if needed.
+      A simple question is one retrieval; do not over-split. Break into sub-questions
+      only when the question genuinely has multiple parts or spans documents.\\n2.
+      ROUTE each retrieval to the tool whose description fits (see above). For `search_filings`,
+      propose the metadata filters you can infer from the question (company, doc type,
+      period); omit what you cannot infer.\\n3. SYNTHESIZE one answer over the retrieved
+      passages.\\n\\nANSWER RULES:\\n1. GROUND EVERY CLAIM in retrieved passages.
+      Attribute inline with the source filing, e.g. \\\"(AAPL 2024 10-K)\\\".\\n2.
+      NO HALLUCINATION: if the retrieved passages do not support an answer, say so
+      in one sentence and stop. Do not guess.\\n3. STYLE: factual and concise. No
+      preamble.\"},{\"role\":\"user\",\"content\":\"What business risks did Tesla
+      describe in its 2024 10-K?\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
+      search over indexed filings, filtered by document metadata.\\n\\n    Filters
+      must be already-resolved, canonical values matching the stamped\\n    corpus:
+      `company` = ticker (e.g. \\\"AAPL\\\"), `doc_type` = form (e.g. \\\"10-K\\\"),\\n
+      \   `period` = fiscal year (e.g. \\\"2024\\\"), `version` = \\\"current\\\".
+      Returns the most\\n    relevant passages, each with the citation metadata needed
+      to attribute it.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"company\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"doc_type\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"period\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"version\":{\"default\":\"current\",\"type\":\"string\"},\"top_k\":{\"default\":5,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}},{\"type\":\"function\",\"function\":{\"name\":\"graph_search\",\"description\":\"Graph-based
+      retrieval for cross-document and multi-hop questions.\\n\\n    Runs a DRIFT
+      search over the knowledge graph built from the filings \u2014\\n    following
+      relationships across documents rather than matching a single\\n    passage \u2014
+      and returns a synthesized sub-answer plus the supporting passages\\n    (each
+      with citation metadata). Prefer this over passage search when the\\n    question
+      spans multiple documents or needs entities/relationships connected.\\n    Unlike
+      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '3401'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"408","message":"DefenderForAI
+        request exceeded 300ms timeout."}}},"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"query\":\"business
+        risks described in the filing; risk factors; business risk; competition; demand;
+        regulation; manufacturing; supply chain; battery materials; autonomy; warranty;
+        litigation\", \"company\":[\"TSLA\"],\"doc_type\":[\"10-K\"],\"period\":[\"2024\"],\"version\":\"current\",\"top_k\":8}","name":"search_filings"},"id":"call_1fp0kG0PRsJNwa1Q9r3UKS6h","type":"function"}]}}],"created":1788786156,"id":"chatcmpl-ELTHYzfiRZRgVgkMuAcYQkq93o7OO","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20260826075037-2deccc7a-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":79,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":5,"engine_ttft_ms":45,"engine_ttlt_ms":428,"pre_inference_ms":367,"service_tbt_ms":5,"service_ttft_ms":720,"service_ttlt_ms":1098,"user_visible_ttft_ms":353},"prompt_tokens":720,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":799}}
+
+        '
+    headers:
+      apim-request-id:
+      - 72aa3656-24ef-4def-aec3-bd17bf6b9d1c
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20260826075037-2deccc7a
+      content-length:
+      - '2210'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:35 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999280'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 7d18904c-bb91-4c16-b7dc-fd83bb882694
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '333'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:37 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '331'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:37 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Semantic
+        search over indexed filings, filtered by document metadata.\n\n    Filters
+        must be already-resolved, canonical values matching the stamped\n    corpus:
+        `company` = ticker (e.g. \"AAPL\"), `doc_type` = form (e.g. \"10-K\"),\n    `period`
+        = fiscal year (e.g. \"2024\"), `version` = \"current\". Returns the most\n    relevant
+        passages, each with the citation metadata needed to attribute it.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"company":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Period"},"version":{"default":"current","title":"Version","type":"string"},"top_k":{"default":5,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"search_filingsArguments"},"name":"search_filings","outputSchema":{"properties":{"result":{"items":{"additionalProperties":true,"type":"object"},"title":"Result","type":"array"}},"required":["result"],"title":"search_filingsOutput","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '1433'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:37 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Graph-based
+        retrieval for cross-document and multi-hop questions.\n\n    Runs a DRIFT
+        search over the knowledge graph built from the filings \u2014\n    following
+        relationships across documents rather than matching a single\n    passage
+        \u2014 and returns a synthesized sub-answer plus the supporting passages\n    (each
+        with citation metadata). Prefer this over passage search when the\n    question
+        spans multiple documents or needs entities/relationships connected.\n    Unlike
+        `search_filings` it is not filtered by document metadata.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"top_k":{"default":10,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"graph_searchArguments"},"name":"graph_search","outputSchema":{"$defs":{"Citation":{"description":"What
+        makes a returned passage citable \u2014 the stamped provenance fields.","properties":{"natural_id":{"title":"Natural
+        Id","type":"string"},"company":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Period"},"version":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Version"},"chunk_index":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Chunk
+        Index"},"headers":{"additionalProperties":{"type":"string"},"default":{},"title":"Headers","type":"object"}},"required":["natural_id"],"title":"Citation","type":"object"},"GeneratedAnswer":{"properties":{"answer":{"title":"Answer","type":"string"},"citations":{"default":[],"items":{"type":"integer"},"title":"Citations","type":"array"},"can_answer":{"title":"Can
+        Answer","type":"boolean"}},"required":["answer","can_answer"],"title":"GeneratedAnswer","type":"object"},"SearchResult":{"properties":{"text":{"title":"Text","type":"string"},"distance":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Distance"},"citation":{"$ref":"#/$defs/Citation"},"source":{"default":"vector","title":"Source","type":"string"}},"required":["text","citation"],"title":"SearchResult","type":"object"}},"description":"A
+        graph sub-answer plus the passages it was built from.\n\nSymmetric with the
+        vector side (GeneratedAnswer over a list of SearchResult),\nso fusion can
+        treat both sources the same. DRIFT already writes a cited prose\nanswer, so
+        `sub_answer` wraps that directly; `results` carry our chunk ids for\ndedup/attribution.","properties":{"sub_answer":{"$ref":"#/$defs/GeneratedAnswer"},"results":{"items":{"$ref":"#/$defs/SearchResult"},"title":"Results","type":"array"}},"required":["sub_answer","results"],"title":"GraphAnswer","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '2963'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:37 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_filings","arguments":{"query":"business
+      risks described in the filing; risk factors; business risk; competition; demand;
+      regulation; manufacturing; supply chain; battery materials; autonomy; warranty;
+      litigation","company":["TSLA"],"doc_type":["10-K"],"period":["2024"],"version":"current","top_k":8},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug","progressToken":3}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '617'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/call
+      mcp-name:
+      - search_filings
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":3,"result":{"content":[],"isError":false,"resultType":"complete","structuredContent":{"result":[]},"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '201'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:37 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"You are a financial-filings
+      research agent. You answer questions about companies' SEC filings by retrieving
+      evidence with tools and synthesizing a cited answer. Use ONLY what the tools
+      return \u2014 never outside knowledge.\\n\\nTOOLS:\\n- `search_filings` \u2014
+      passage search within specific filings, filtered by metadata (company, doc type,
+      period). Use for direct, single-document lookups (\\\"What was AAPL's 2024 revenue?\\\").\\n-
+      `graph_search` \u2014 cross-document, multi-hop retrieval over the knowledge
+      graph. Use when the question spans multiple filings or needs entities/relationships
+      connected (\\\"How has Apple's supply-chain risk language evolved across years?\\\").
+      It is not filtered by metadata.\\n\\nPROCESS:\\n1. DECOMPOSE only if needed.
+      A simple question is one retrieval; do not over-split. Break into sub-questions
+      only when the question genuinely has multiple parts or spans documents.\\n2.
+      ROUTE each retrieval to the tool whose description fits (see above). For `search_filings`,
+      propose the metadata filters you can infer from the question (company, doc type,
+      period); omit what you cannot infer.\\n3. SYNTHESIZE one answer over the retrieved
+      passages.\\n\\nANSWER RULES:\\n1. GROUND EVERY CLAIM in retrieved passages.
+      Attribute inline with the source filing, e.g. \\\"(AAPL 2024 10-K)\\\".\\n2.
+      NO HALLUCINATION: if the retrieved passages do not support an answer, say so
+      in one sentence and stop. Do not guess.\\n3. STYLE: factual and concise. No
+      preamble.\"},{\"role\":\"user\",\"content\":\"What business risks did Tesla
+      describe in its 2024 10-K?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"arguments\":\"{\\\"query\\\":\\\"business
+      risks described in the filing; risk factors; business risk; competition; demand;
+      regulation; manufacturing; supply chain; battery materials; autonomy; warranty;
+      litigation\\\", \\\"company\\\":[\\\"TSLA\\\"],\\\"doc_type\\\":[\\\"10-K\\\"],\\\"period\\\":[\\\"2024\\\"],\\\"version\\\":\\\"current\\\",\\\"top_k\\\":8}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"content\":\"\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
+      search over indexed filings, filtered by document metadata.\\n\\n    Filters
+      must be already-resolved, canonical values matching the stamped\\n    corpus:
+      `company` = ticker (e.g. \\\"AAPL\\\"), `doc_type` = form (e.g. \\\"10-K\\\"),\\n
+      \   `period` = fiscal year (e.g. \\\"2024\\\"), `version` = \\\"current\\\".
+      Returns the most\\n    relevant passages, each with the citation metadata needed
+      to attribute it.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"company\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"doc_type\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"period\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"version\":{\"default\":\"current\",\"type\":\"string\"},\"top_k\":{\"default\":5,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}},{\"type\":\"function\",\"function\":{\"name\":\"graph_search\",\"description\":\"Graph-based
+      retrieval for cross-document and multi-hop questions.\\n\\n    Runs a DRIFT
+      search over the knowledge graph built from the filings \u2014\\n    following
+      relationships across documents rather than matching a single\\n    passage \u2014
+      and returns a synthesized sub-answer plus the supporting passages\\n    (each
+      with citation metadata). Prefer this over passage search when the\\n    question
+      spans multiple documents or needs entities/relationships connected.\\n    Unlike
+      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '3939'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: '{"choices":[{"content_filter_result":{"error":{"code":"content_filter_error","message":"The
+        contents are not filtered"}},"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"408","message":"DefenderForAI
+        request exceeded 300ms timeout."}}},"protected_material_code":{"detected":false,"filtered":false}},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"query\":\"risk
+        factors and business risks; our business is subject to risks; we face risks
+        related to; could materially and adversely affect; 10-K risk factors\",\"company\":[\"TSLA\"],\"doc_type\":[\"10-K\"],\"period\":[\"2024\"],\"version\":\"current\",\"top_k\":8}","name":"search_filings"},"id":"call_pRlmGep6SyA0znOO8Rx3gmhI","type":"function"}]}}],"created":1788786172,"id":"chatcmpl-ELTHoYYdcdwtG3pxXXjZ0b6nQdHRd","model":"gpt-5.4-mini-2026-03-17","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"defender_for_ai":{"detected":false,"filtered":false,"details":{"error":{"code":"408","message":"DefenderForAI
+        request exceeded 300ms timeout."}}},"hate":{"filtered":false,"severity":"safe"},"indirect_attack":{"detected":false,"filtered":false},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"routing":{"serving_pipereplica":"d20260826075037-2deccc7a-default-r0-dp0-default"},"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":76,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":0,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":4,"engine_ttft_ms":111,"engine_ttlt_ms":432,"pre_inference_ms":12764,"service_tbt_ms":8,"service_ttft_ms":13718,"service_ttlt_ms":14309,"user_visible_ttft_ms":954},"prompt_tokens":809,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":885}}
+
+        '
+    headers:
+      apim-request-id:
+      - 6ffdeebc-e565-47b6-bd51-b510f2d5ead5
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20260826075037-2deccc7a
+      content-length:
+      - '2123'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:38 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999191'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - ce9d6448-4d87-454c-9359-3738500afa5e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '333'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:53 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '245'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - server/discover
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":1,"result":{"cacheScope":"private","capabilities":{"prompts":{"listChanged":true},"resources":{"listChanged":true,"subscribe":true},"tools":{"listChanged":true}},"resultType":"complete","supportedVersions":["2026-07-28"],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '331'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:54 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Semantic
+        search over indexed filings, filtered by document metadata.\n\n    Filters
+        must be already-resolved, canonical values matching the stamped\n    corpus:
+        `company` = ticker (e.g. \"AAPL\"), `doc_type` = form (e.g. \"10-K\"),\n    `period`
+        = fiscal year (e.g. \"2024\"), `version` = \"current\". Returns the most\n    relevant
+        passages, each with the citation metadata needed to attribute it.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"company":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"default":null,"title":"Period"},"version":{"default":"current","title":"Version","type":"string"},"top_k":{"default":5,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"search_filingsArguments"},"name":"search_filings","outputSchema":{"properties":{"result":{"items":{"additionalProperties":true,"type":"object"},"title":"Result","type":"array"}},"required":["result"],"title":"search_filingsOutput","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '1433'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:53 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug"}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '283'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/list
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://graph-retrieval-app-1:8002/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":2,"result":{"cacheScope":"private","resultType":"complete","tools":[{"description":"Graph-based
+        retrieval for cross-document and multi-hop questions.\n\n    Runs a DRIFT
+        search over the knowledge graph built from the filings \u2014\n    following
+        relationships across documents rather than matching a single\n    passage
+        \u2014 and returns a synthesized sub-answer plus the supporting passages\n    (each
+        with citation metadata). Prefer this over passage search when the\n    question
+        spans multiple documents or needs entities/relationships connected.\n    Unlike
+        `search_filings` it is not filtered by document metadata.\n    ","inputSchema":{"type":"object","properties":{"query":{"title":"Query","type":"string"},"top_k":{"default":10,"title":"Top
+        K","type":"integer"}},"required":["query"],"title":"graph_searchArguments"},"name":"graph_search","outputSchema":{"$defs":{"Citation":{"description":"What
+        makes a returned passage citable \u2014 the stamped provenance fields.","properties":{"natural_id":{"title":"Natural
+        Id","type":"string"},"company":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Company"},"doc_type":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Doc
+        Type"},"period":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Period"},"version":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Version"},"chunk_index":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Chunk
+        Index"},"headers":{"additionalProperties":{"type":"string"},"default":{},"title":"Headers","type":"object"}},"required":["natural_id"],"title":"Citation","type":"object"},"GeneratedAnswer":{"properties":{"answer":{"title":"Answer","type":"string"},"citations":{"default":[],"items":{"type":"integer"},"title":"Citations","type":"array"},"can_answer":{"title":"Can
+        Answer","type":"boolean"}},"required":["answer","can_answer"],"title":"GeneratedAnswer","type":"object"},"SearchResult":{"properties":{"text":{"title":"Text","type":"string"},"distance":{"anyOf":[{"type":"number"},{"type":"null"}],"default":null,"title":"Distance"},"citation":{"$ref":"#/$defs/Citation"},"source":{"default":"vector","title":"Source","type":"string"}},"required":["text","citation"],"title":"SearchResult","type":"object"}},"description":"A
+        graph sub-answer plus the passages it was built from.\n\nSymmetric with the
+        vector side (GeneratedAnswer over a list of SearchResult),\nso fusion can
+        treat both sources the same. DRIFT already writes a cited prose\nanswer, so
+        `sub_answer` wraps that directly; `results` carry our chunk ids for\ndedup/attribution.","properties":{"sub_answer":{"$ref":"#/$defs/GeneratedAnswer"},"results":{"items":{"$ref":"#/$defs/SearchResult"},"title":"Results","type":"array"}},"required":["sub_answer","results"],"title":"GraphAnswer","type":"object"}}],"ttlMs":0,"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"graph","version":""}}}}'
+    headers:
+      content-length:
+      - '2963'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:54 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_filings","arguments":{"query":"risk
+      factors and business risks; our business is subject to risks; we face risks
+      related to; could materially and adversely affect; 10-K risk factors","company":["TSLA"],"doc_type":["10-K"],"period":["2024"],"version":"current","top_k":8},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp","version":"0.1.0"},"io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/logLevel":"debug","progressToken":3}}}'
+    headers:
+      accept:
+      - application/json, text/event-stream
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '586'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      mcp-method:
+      - tools/call
+      mcp-name:
+      - search_filings
+      mcp-protocol-version:
+      - '2026-07-28'
+      user-agent:
+      - python-httpx2/2.12.0
+    method: POST
+    uri: http://retrieval-app-1:8001/mcp
+  response:
+    body:
+      string: '{"jsonrpc":"2.0","id":3,"result":{"content":[],"isError":false,"resultType":"complete","structuredContent":{"result":[]},"_meta":{"io.modelcontextprotocol/serverInfo":{"name":"filings","version":""}}}}'
+    headers:
+      content-length:
+      - '201'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:53 GMT
+      server:
+      - uvicorn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"You are a financial-filings
+      research agent. You answer questions about companies' SEC filings by retrieving
+      evidence with tools and synthesizing a cited answer. Use ONLY what the tools
+      return \u2014 never outside knowledge.\\n\\nTOOLS:\\n- `search_filings` \u2014
+      passage search within specific filings, filtered by metadata (company, doc type,
+      period). Use for direct, single-document lookups (\\\"What was AAPL's 2024 revenue?\\\").\\n-
+      `graph_search` \u2014 cross-document, multi-hop retrieval over the knowledge
+      graph. Use when the question spans multiple filings or needs entities/relationships
+      connected (\\\"How has Apple's supply-chain risk language evolved across years?\\\").
+      It is not filtered by metadata.\\n\\nPROCESS:\\n1. DECOMPOSE only if needed.
+      A simple question is one retrieval; do not over-split. Break into sub-questions
+      only when the question genuinely has multiple parts or spans documents.\\n2.
+      ROUTE each retrieval to the tool whose description fits (see above). For `search_filings`,
+      propose the metadata filters you can infer from the question (company, doc type,
+      period); omit what you cannot infer.\\n3. SYNTHESIZE one answer over the retrieved
+      passages.\\n\\nANSWER RULES:\\n1. GROUND EVERY CLAIM in retrieved passages.
+      Attribute inline with the source filing, e.g. \\\"(AAPL 2024 10-K)\\\".\\n2.
+      NO HALLUCINATION: if the retrieved passages do not support an answer, say so
+      in one sentence and stop. Do not guess.\\n3. STYLE: factual and concise. No
+      preamble.\"},{\"role\":\"user\",\"content\":\"What business risks did Tesla
+      describe in its 2024 10-K?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"arguments\":\"{\\\"query\\\":\\\"business
+      risks described in the filing; risk factors; business risk; competition; demand;
+      regulation; manufacturing; supply chain; battery materials; autonomy; warranty;
+      litigation\\\", \\\"company\\\":[\\\"TSLA\\\"],\\\"doc_type\\\":[\\\"10-K\\\"],\\\"period\\\":[\\\"2024\\\"],\\\"version\\\":\\\"current\\\",\\\"top_k\\\":8}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"content\":\"\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_pRlmGep6SyA0znOO8Rx3gmhI\",\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"arguments\":\"{\\\"query\\\":\\\"risk
+      factors and business risks; our business is subject to risks; we face risks
+      related to; could materially and adversely affect; 10-K risk factors\\\",\\\"company\\\":[\\\"TSLA\\\"],\\\"doc_type\\\":[\\\"10-K\\\"],\\\"period\\\":[\\\"2024\\\"],\\\"version\\\":\\\"current\\\",\\\"top_k\\\":8}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_pRlmGep6SyA0znOO8Rx3gmhI\",\"content\":\"\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
+      search over indexed filings, filtered by document metadata.\\n\\n    Filters
+      must be already-resolved, canonical values matching the stamped\\n    corpus:
+      `company` = ticker (e.g. \\\"AAPL\\\"), `doc_type` = form (e.g. \\\"10-K\\\"),\\n
+      \   `period` = fiscal year (e.g. \\\"2024\\\"), `version` = \\\"current\\\".
+      Returns the most\\n    relevant passages, each with the citation metadata needed
+      to attribute it.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"company\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"doc_type\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"period\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"version\":{\"default\":\"current\",\"type\":\"string\"},\"top_k\":{\"default\":5,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}},{\"type\":\"function\",\"function\":{\"name\":\"graph_search\",\"description\":\"Graph-based
+      retrieval for cross-document and multi-hop questions.\\n\\n    Runs a DRIFT
+      search over the knowledge graph built from the filings \u2014\\n    following
+      relationships across documents rather than matching a single\\n    passage \u2014
+      and returns a synthesized sub-answer plus the supporting passages\\n    (each
+      with citation metadata). Prefer this over passage search when the\\n    question
+      spans multiple documents or needs entities/relationships connected.\\n    Unlike
+      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '4445'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"message\": \"The server had an error while
+        processing your request. Sorry about that!\",\n    \"type\": \"server_error\",\n
+        \   \"param\": null,\n    \"code\": null\n  }\n}"
+    headers:
+      apim-request-id:
+      - 7a977abf-cfe0-46da-b545-3a7d9ed60c3b
+      content-length:
+      - '175'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:02:55 GMT
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-content-type-options:
+      - nosniff
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-request-id:
+      - 0efbc83d-5262-4837-8e84-8bad99e766ca
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"You are a financial-filings
+      research agent. You answer questions about companies' SEC filings by retrieving
+      evidence with tools and synthesizing a cited answer. Use ONLY what the tools
+      return \u2014 never outside knowledge.\\n\\nTOOLS:\\n- `search_filings` \u2014
+      passage search within specific filings, filtered by metadata (company, doc type,
+      period). Use for direct, single-document lookups (\\\"What was AAPL's 2024 revenue?\\\").\\n-
+      `graph_search` \u2014 cross-document, multi-hop retrieval over the knowledge
+      graph. Use when the question spans multiple filings or needs entities/relationships
+      connected (\\\"How has Apple's supply-chain risk language evolved across years?\\\").
+      It is not filtered by metadata.\\n\\nPROCESS:\\n1. DECOMPOSE only if needed.
+      A simple question is one retrieval; do not over-split. Break into sub-questions
+      only when the question genuinely has multiple parts or spans documents.\\n2.
+      ROUTE each retrieval to the tool whose description fits (see above). For `search_filings`,
+      propose the metadata filters you can infer from the question (company, doc type,
+      period); omit what you cannot infer.\\n3. SYNTHESIZE one answer over the retrieved
+      passages.\\n\\nANSWER RULES:\\n1. GROUND EVERY CLAIM in retrieved passages.
+      Attribute inline with the source filing, e.g. \\\"(AAPL 2024 10-K)\\\".\\n2.
+      NO HALLUCINATION: if the retrieved passages do not support an answer, say so
+      in one sentence and stop. Do not guess.\\n3. STYLE: factual and concise. No
+      preamble.\"},{\"role\":\"user\",\"content\":\"What business risks did Tesla
+      describe in its 2024 10-K?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"arguments\":\"{\\\"query\\\":\\\"business
+      risks described in the filing; risk factors; business risk; competition; demand;
+      regulation; manufacturing; supply chain; battery materials; autonomy; warranty;
+      litigation\\\", \\\"company\\\":[\\\"TSLA\\\"],\\\"doc_type\\\":[\\\"10-K\\\"],\\\"period\\\":[\\\"2024\\\"],\\\"version\\\":\\\"current\\\",\\\"top_k\\\":8}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_1fp0kG0PRsJNwa1Q9r3UKS6h\",\"content\":\"\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"call_pRlmGep6SyA0znOO8Rx3gmhI\",\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"arguments\":\"{\\\"query\\\":\\\"risk
+      factors and business risks; our business is subject to risks; we face risks
+      related to; could materially and adversely affect; 10-K risk factors\\\",\\\"company\\\":[\\\"TSLA\\\"],\\\"doc_type\\\":[\\\"10-K\\\"],\\\"period\\\":[\\\"2024\\\"],\\\"version\\\":\\\"current\\\",\\\"top_k\\\":8}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"call_pRlmGep6SyA0znOO8Rx3gmhI\",\"content\":\"\"}],\"model\":\"gpt-5.4-mini\",\"stream\":false,\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"search_filings\",\"description\":\"Semantic
+      search over indexed filings, filtered by document metadata.\\n\\n    Filters
+      must be already-resolved, canonical values matching the stamped\\n    corpus:
+      `company` = ticker (e.g. \\\"AAPL\\\"), `doc_type` = form (e.g. \\\"10-K\\\"),\\n
+      \   `period` = fiscal year (e.g. \\\"2024\\\"), `version` = \\\"current\\\".
+      Returns the most\\n    relevant passages, each with the citation metadata needed
+      to attribute it.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"company\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"doc_type\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"period\":{\"default\":null,\"anyOf\":[{\"items\":{\"type\":\"string\"},\"type\":\"array\"},{\"type\":\"null\"}]},\"version\":{\"default\":\"current\",\"type\":\"string\"},\"top_k\":{\"default\":5,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}},{\"type\":\"function\",\"function\":{\"name\":\"graph_search\",\"description\":\"Graph-based
+      retrieval for cross-document and multi-hop questions.\\n\\n    Runs a DRIFT
+      search over the knowledge graph built from the filings \u2014\\n    following
+      relationships across documents rather than matching a single\\n    passage \u2014
+      and returns a synthesized sub-answer plus the supporting passages\\n    (each
+      with citation metadata). Prefer this over passage search when the\\n    question
+      spans multiple documents or needs entities/relationships connected.\\n    Unlike
+      `search_filings` it is not filtered by document metadata.\\n    \",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"top_k\":{\"default\":10,\"type\":\"integer\"}},\"required\":[\"query\"],\"additionalProperties\":false}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '4445'
+      content-type:
+      - application/json
+      host:
+      - fake-resource.openai.azure.com
+      user-agent:
+      - pydantic-ai/2.31.1
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.54.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '1'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.14
+    method: POST
+    uri: https://fake-resource.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-04-01-preview
+  response:
+    body:
+      string: "{\"choices\":[{\"content_filter_results\":{\"defender_for_ai\":{\"detected\":false,\"filtered\":false,\"details\":{}},\"hate\":{\"filtered\":false,\"severity\":\"safe\"},\"protected_material_code\":{\"detected\":false,\"filtered\":false},\"protected_material_text\":{\"detected\":false,\"filtered\":false},\"self_harm\":{\"filtered\":false,\"severity\":\"safe\"},\"sexual\":{\"filtered\":false,\"severity\":\"safe\"},\"violence\":{\"filtered\":false,\"severity\":\"safe\"}},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"I
+        couldn\u2019t retrieve any passages from Tesla\u2019s 2024 10-K to support
+        a grounded answer.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1788786187,\"id\":\"chatcmpl-ELTI3hbGECQO0A4bUrU8hSCrnXYmC\",\"model\":\"gpt-5.4-mini-2026-03-17\",\"object\":\"chat.completion\",\"prompt_filter_results\":[{\"prompt_index\":0,\"content_filter_results\":{\"defender_for_ai\":{\"detected\":false,\"filtered\":false,\"details\":{}},\"hate\":{\"filtered\":false,\"severity\":\"safe\"},\"indirect_attack\":{\"detected\":false,\"filtered\":false},\"jailbreak\":{\"detected\":false,\"filtered\":false},\"self_harm\":{\"filtered\":false,\"severity\":\"safe\"},\"sexual\":{\"filtered\":false,\"severity\":\"safe\"},\"violence\":{\"filtered\":false,\"severity\":\"safe\"}}}],\"routing\":{\"serving_pipereplica\":\"d20260826075037-2deccc7a-default-r0-dp0-default\"},\"service_tier\":\"default\",\"system_fingerprint\":null,\"usage\":{\"completion_tokens\":25,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"latency_checkpoint\":{\"engine_tbt_ms\":5,\"engine_ttft_ms\":41,\"engine_ttlt_ms\":170,\"pre_inference_ms\":163,\"service_tbt_ms\":5,\"service_ttft_ms\":469,\"service_ttlt_ms\":594,\"user_visible_ttft_ms\":306},\"prompt_tokens\":896,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":921}}\n"
+    headers:
+      apim-request-id:
+      - 6db5555c-6a41-4a4f-89a5-75bb155b4bfe
+      azureai-fe-is-streaming:
+      - 'False'
+      azureai-fe-offer-type:
+      - paygo
+      azureml-model-session:
+      - d20260826075037-2deccc7a
+      content-length:
+      - '1784'
+      content-type:
+      - application/json
+      date:
+      - Mon, 07 Sep 2026 13:03:06 GMT
+      server:
+      - istio-envoy
+      skip-error-remapping:
+      - 'true'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-accel-buffering:
+      - 'no'
+      x-content-type-options:
+      - nosniff
+      x-ms-is-spilled-over:
+      - 'false'
+      x-ms-rai-invoked:
+      - 'true'
+      x-ms-region:
+      - East US
+      x-ms-served-model:
+      - gpt-5.4-mini-2026-03-17
+      x-ratelimit-abusepenalty-active:
+      - 'False'
+      x-ratelimit-key:
+      - gpt-5.4-mini
+      x-ratelimit-limit-requests:
+      - '15000'
+      x-ratelimit-limit-tokens:
+      - '15000000'
+      x-ratelimit-remaining-requests:
+      - '14999'
+      x-ratelimit-remaining-tokens:
+      - '14999104'
+      x-ratelimit-renewalperiod-requests:
+      - '60'
+      x-ratelimit-renewalperiod-tokens:
+      - '60'
+      x-ratelimit-reset-requests:
+      - '0'
+      x-ratelimit-reset-tokens:
+      - '0'
+      x-request-id:
+      - 4bbbab6a-105b-4ef4-b93c-6ca2256d2b35
+    status:
+      code: 200
+      message: OK
+version: 1

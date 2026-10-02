@@ -1,55 +1,16 @@
 """FastAPI wiring: request models, serialization, dependency override.
 
-Hermetic — the orchestrator is replaced via dependency override with a fake, so no
-pipeline / MCP / network. Asserts the two endpoints accept their bodies and return
-the orchestrator's output as JSON. The real orchestrator+MCP path is the
-in-container smoke, not here.
+Hermetic — the agent is replaced via dependency override with a fake, so no
+model / MCP / network. Asserts the two agent endpoints accept their bodies, hold
+on a pending approval, and carry the analyst's decision back into the loop. The
+real model+MCP path is test_agent.py, not here.
 """
 
 from fastapi.testclient import TestClient
+from pydantic_ai import DeferredToolRequests
+from pydantic_ai.messages import ModelResponse, ToolCallPart
 
-from financial_doc_ai.query.rewriter import Filters, QueryRewrite
-from financial_doc_ai.retrieval.search import Citation, SearchResult
-from financial_doc_ai.serving.api import app, get_orchestrator
-from financial_doc_ai.serving.generator import GeneratedAnswer
-from financial_doc_ai.serving.orchestrator import Answer, Interpretation
-
-
-class _FakeOrchestrator:
-    def __init__(self):
-        self.answer_calls = []
-
-    async def interpret(self, question, session_context=None):
-        return Interpretation(
-            query_type="other",
-            rewritten_query=question,
-            proposed_filters=Filters(company=["AAPL"], doc_type=["10-K"]),
-            companies=[],
-            needs_confirmation=True,
-            reasons=["Could not resolve company 'Acme'."],
-        )
-
-    async def answer(self, question, confirmed_filters, top_k=5):
-        self.answer_calls.append((question, confirmed_filters, top_k))
-        return Answer(
-            generated=GeneratedAnswer(
-                answer="Apple faces risks including... [1]",
-                citations=[1],
-                can_answer=True,
-            ),
-            results=[
-                SearchResult(
-                    text="Apple risk factors",
-                    distance=0.1,
-                    citation=Citation(natural_id="AAPL-10K-2024", company="AAPL", period="2024"),
-                )
-            ],
-        )
-
-
-def _client(fake):
-    app.dependency_overrides[get_orchestrator] = lambda: fake
-    return TestClient(app)
+from financial_doc_ai.serving.api import app, get_agent
 
 
 def test_health():
@@ -57,30 +18,84 @@ def test_health():
     assert client.get("/health").json() == {"status": "ok"}
 
 
-def test_interpret_returns_proposed_filters_and_gate():
-    client = _client(_FakeOrchestrator())
+# --- agent path (hermetic fake; real LLM+MCP path is test_agent.py) ---------
+
+# A held search: the model targeted a company that didn't resolve, so this call
+# is pending the analyst's OK. Its tool_call_id is what the client sends a
+# decision for on /agent/resume.
+_HELD_CALL = ToolCallPart(
+    tool_name="search_filings",
+    args={"company": ["Acme"]},
+    tool_call_id="call_1",
+)
+
+
+class _FakeAgentResult:
+    def __init__(self, output, messages):
+        self.output = output
+        self._messages = messages
+
+    def all_messages(self):
+        return self._messages
+
+
+class _FakeAgent:
+    """Stands in for the pydantic-ai Agent: pauses on the first run, answers on
+    resume. Records the approval decision the endpoint fed back."""
+
+    def __init__(self):
+        self.resume_decisions = None
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+    async def run(self, user_prompt=None, *, message_history=None, deferred_tool_results=None):
+        if deferred_tool_results is None:  # /agent/ask -> hold the search
+            return _FakeAgentResult(
+                DeferredToolRequests(approvals=[_HELD_CALL]),
+                [ModelResponse(parts=[_HELD_CALL])],
+            )
+        # /agent/resume -> the decision came back; the loop finishes.
+        self.resume_decisions = deferred_tool_results.approvals
+        return _FakeAgentResult("Apple faces risks including... [1]", [])
+
+
+def _agent_client(fake):
+    app.dependency_overrides[get_agent] = lambda: fake
+    return TestClient(app)
+
+
+def test_agent_ask_holds_unresolved_company():
+    client = _agent_client(_FakeAgent())
     try:
-        resp = client.post("/interpret", json={"question": "How did Acme do?"})
+        resp = client.post("/agent/ask", json={"question": "How did Acme do?"})
     finally:
         app.dependency_overrides.clear()
 
     assert resp.status_code == 200
     body = resp.json()
-    assert body["proposed_filters"]["company"] == ["AAPL"]
-    assert body["needs_confirmation"] is True
-    assert body["reasons"]
+    assert body["status"] == "held"
+    assert body["answer"] is None
+    # The client learns which call to confirm and what company it targets.
+    assert body["held"][0]["tool_call_id"] == "call_1"
+    assert body["held"][0]["args"] == {"company": ["Acme"]}
+    # The paused run travels back for the client to echo to /resume.
+    assert body["message_history"]
 
 
-def test_answer_retrieves_on_posted_filters():
-    fake = _FakeOrchestrator()
-    client = _client(fake)
+def test_agent_resume_carries_decision_and_finishes():
+    fake = _FakeAgent()
+    client = _agent_client(fake)
     try:
+        held = client.post("/agent/ask", json={"question": "How did Acme do?"}).json()
         resp = client.post(
-            "/answer",
+            "/agent/resume",
             json={
-                "question": "risk factors",
-                "filters": {"company": ["AAPL"], "period": ["2024"]},
-                "top_k": 3,
+                "message_history": held["message_history"],
+                "approvals": {"call_1": True},
             },
         )
     finally:
@@ -88,11 +103,7 @@ def test_answer_retrieves_on_posted_filters():
 
     assert resp.status_code == 200
     body = resp.json()
-    results = body["results"]
-    assert results[0]["citation"]["natural_id"] == "AAPL-10K-2024"
-    assert body["generated"]["answer"]
-    assert body["generated"]["can_answer"] is True
-    # The posted (confirmed) filters + top_k reach the orchestrator verbatim.
-    _, filters, top_k = fake.answer_calls[0]
-    assert filters == Filters(company=["AAPL"], period=["2024"])
-    assert top_k == 3
+    assert body["status"] == "answered"
+    assert body["answer"]
+    # The analyst's approval reached the loop as an approval for that exact call.
+    assert fake.resume_decisions == {"call_1": True}

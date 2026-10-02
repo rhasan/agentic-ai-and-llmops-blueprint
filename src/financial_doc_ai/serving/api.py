@@ -1,42 +1,87 @@
-"""Thin FastAPI over the orchestrator — the online-path entry point.
+"""Thin FastAPI over the agent — the online-path entry point.
 
-Two endpoints exercise the stateless HITL flow (see docs/retrieval-and-serving.md):
-`POST /interpret` proposes filters and says whether the analyst must confirm;
-`POST /answer` retrieves on the (possibly corrected) filters the client sends back.
-No web UI yet; a client renders the proposed filters and posts them to /answer.
+The GraphRAG agent loop with its own in-loop confirm gate:
+`POST /agent/ask` runs the loop; if the model targets a company that doesn't
+resolve, the search is held and the endpoint returns the pending approval instead
+of an answer. The paused run's state travels back to the client as an opaque
+`message_history` blob (no server-side store): the client shows the held company
+to the analyst and `POST /agent/resume`s with the decision and that blob, and the
+loop continues from where it paused.
 
 Run: `uv run uvicorn financial_doc_ai.serving.api:app --host 0.0.0.0 --port 8000`
 """
 
+from typing import Any, Literal
+
 from fastapi import Depends, FastAPI
 from pydantic import BaseModel
+from pydantic_ai import Agent, DeferredToolRequests, DeferredToolResults
+from pydantic_ai.messages import ModelMessagesTypeAdapter
+from pydantic_ai.tools import ToolDenied
 
-from financial_doc_ai.query.rewriter import Filters
-from financial_doc_ai.serving.orchestrator import Answer, Interpretation, Orchestrator
+from financial_doc_ai.serving.agent import build_agent
 
 app = FastAPI(title="financial-doc-ai")
 
 # Lazy singleton so importing the module (e.g. in tests, which override the
-# dependency) doesn't construct the pipeline / fetch prompts / read env.
-_orchestrator: Orchestrator | None = None
+# dependency) doesn't build the agent / read env.
+_agent: Agent | None = None
 
 
-def get_orchestrator() -> Orchestrator:
-    global _orchestrator
-    if _orchestrator is None:
-        _orchestrator = Orchestrator()
-    return _orchestrator
+def get_agent() -> Agent:
+    global _agent
+    if _agent is None:
+        _agent = build_agent()
+    return _agent
 
 
-class InterpretRequest(BaseModel):
+class AskRequest(BaseModel):
     question: str
-    session_context: str | None = None
 
 
-class AnswerRequest(BaseModel):
-    question: str
-    filters: Filters
-    top_k: int = 5
+class HeldCall(BaseModel):
+    """One search the loop paused on, for the analyst to confirm."""
+
+    tool_call_id: str
+    tool_name: str
+    args: dict[str, Any]
+
+
+class ResumeRequest(BaseModel):
+    # Echoed back verbatim from a prior held response; opaque to the client.
+    message_history: Any
+    # tool_call_id -> approve (True) or reject (False).
+    approvals: dict[str, bool]
+
+
+class AgentResponse(BaseModel):
+    """Either the finished answer, or the calls held pending approval."""
+
+    status: Literal["answered", "held"]
+    answer: str | None = None
+    held: list[HeldCall] = []
+    # Present only when held: the paused run's serialized state to send to /resume.
+    message_history: Any | None = None
+
+
+def _to_agent_response(result: Any) -> AgentResponse:
+    output = result.output
+    if isinstance(output, DeferredToolRequests):
+        return AgentResponse(
+            status="held",
+            held=[
+                HeldCall(
+                    tool_call_id=call.tool_call_id,
+                    tool_name=call.tool_name,
+                    args=call.args_as_dict(),
+                )
+                for call in output.approvals
+            ],
+            message_history=ModelMessagesTypeAdapter.dump_python(
+                result.all_messages(), mode="json"
+            ),
+        )
+    return AgentResponse(status="answered", answer=output)
 
 
 @app.get("/health")
@@ -44,15 +89,27 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/interpret")
-async def interpret(
-    req: InterpretRequest, orch: Orchestrator = Depends(get_orchestrator)
-) -> Interpretation:
-    return await orch.interpret(req.question, req.session_context)
+@app.post("/agent/ask")
+async def agent_ask(
+    req: AskRequest, agent: Agent = Depends(get_agent)
+) -> AgentResponse:
+    async with agent:  # opens the MCP toolset connections for the run
+        result = await agent.run(req.question)
+    return _to_agent_response(result)
 
 
-@app.post("/answer")
-async def answer(
-    req: AnswerRequest, orch: Orchestrator = Depends(get_orchestrator)
-) -> Answer:
-    return await orch.answer(req.question, req.filters, req.top_k)
+@app.post("/agent/resume")
+async def agent_resume(
+    req: ResumeRequest, agent: Agent = Depends(get_agent)
+) -> AgentResponse:
+    history = ModelMessagesTypeAdapter.validate_python(req.message_history)
+    results = DeferredToolResults()
+    for tool_call_id, approved in req.approvals.items():
+        results.approvals[tool_call_id] = (
+            True if approved else ToolDenied("Rejected by the analyst.")
+        )
+    async with agent:
+        result = await agent.run(
+            message_history=history, deferred_tool_results=results
+        )
+    return _to_agent_response(result)

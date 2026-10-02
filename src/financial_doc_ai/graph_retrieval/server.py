@@ -15,7 +15,7 @@ import os
 
 from mcp.server.mcpserver import MCPServer
 
-from financial_doc_ai.graph_retrieval.search import GraphSearch
+from financial_doc_ai.graph_retrieval.search import GraphAnswer, GraphSearch
 
 mcp = MCPServer("graph")
 
@@ -25,7 +25,7 @@ _search = GraphSearch()
 
 
 @mcp.tool()
-async def graph_search(query: str, top_k: int = 10) -> dict:
+async def graph_search(query: str, top_k: int = 10) -> GraphAnswer:
     """Graph-based retrieval for cross-document and multi-hop questions.
 
     Runs a DRIFT search over the knowledge graph built from the filings —
@@ -35,11 +35,9 @@ async def graph_search(query: str, top_k: int = 10) -> dict:
     question spans multiple documents or needs entities/relationships connected.
     Unlike `search_filings` it is not filtered by document metadata.
     """
-    result = await _search.search(query, top_k=top_k)
-    return {
-        "sub_answer": result.sub_answer.model_dump(),
-        "results": [r.model_dump() for r in result.results],
-    }
+    # Return the typed model so MCP emits an output schema + structured_content
+    # (symmetric with search_filings' typed list); the client reads that directly.
+    return await _search.search(query, top_k=top_k)
 
 
 if __name__ == "__main__":

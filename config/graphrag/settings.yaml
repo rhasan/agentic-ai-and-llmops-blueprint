@@ -44,3 +44,13 @@ reporting:
 vector_store:
   type: lancedb
   db_uri: /app/data/graphrag/output/lancedb
+
+# DRIFT online-search tuning (query time; no effect on the index). Defaults are
+# n_depth=3 / drift_k_followups=20 / primer_folds=5 — thorough but ~90-125s per
+# query, since the n_depth rounds run sequentially. This is a middle ground:
+# keep a second hop (real multi-hop reasoning) but drop the third round, and
+# halve the follow-ups per round. See docs/specs/graphrag-financial-doc-ai.md.
+drift_search:
+  n_depth: 2            # 3 -> 2: keep one extra hop, drop the sequential third round
+  drift_k_followups: 10 # 20 -> 10: half the follow-up sub-questions per round
+  primer_folds: 4       # 5 -> 4: minor primer trim (primer isn't the bottleneck)
