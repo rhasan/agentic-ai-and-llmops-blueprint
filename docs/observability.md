@@ -12,7 +12,7 @@ request inspection. Prompt versioning is a secondary feature served by the same 
 | Purpose | LLM tracing / observability (primary), prompt versioning (bonus) |
 | Deployment | One container, embedded **SQLite** backend, one volume for persistence |
 | Ingestion | OpenTelemetry — built-in OTLP collector (gRPC `4317`, HTTP/UI `6006`) |
-| Instrumentation | PydanticAI's **native** OTel emission, switched on in `telemetry.py`. See *Tracing* below. |
+| Instrumentation | PydanticAI's **native** OTel emission for the agent loop, plus the OpenInference LiteLLM instrumentor for the retrieval and GraphRAG model calls. Both switched on in `telemetry.py`. See *Tracing* below. |
 | License | **Elastic License 2.0 (ELv2)** — free for internal/reference use; may not be offered as a competing managed service |
 
 Run:
@@ -32,14 +32,12 @@ codebase are instrumented via OpenInference and export spans to Phoenix over OTL
 
 ## Tracing
 
-Phoenix runs and receives nothing. No OTel code in `src/`.
-
 1. **Instrument the app** — point OpenTelemetry at Phoenix from the serving process.
    PydanticAI emits the spans: the agent run, each model turn with its token counts,
-   each tool call.
-2. **Instrument the MCP servers** — the same setup in each server. They trace
-   independently; the traces are separate and meet only in Phoenix. Covers the LLM and
-   embedding calls made inside `search_filings` and `graph_search`.
+   each tool call. **Done.**
+2. **Instrument the MCP servers** — the same setup in each server, plus a LiteLLM
+   instrumentor for the model calls they make. The MCP SDK propagates the trace id, so
+   one question is one trace across all three containers. **Done.**
 3. **Read cost and latency in Phoenix** — token spend per model and time spent per
    step, from the spans the first two steps produce. Dashboard work, no new
    instrumentation.
@@ -73,7 +71,7 @@ One setup function, called once when the process starts.
 |---|---|
 | `arize-phoenix-otel` | Dependency. Its `register()` builds the tracer provider and the OTLP exporter in one call, with Phoenix's defaults. |
 | `telemetry.py` (top-level) | `setup_tracing(project_name)`: return early if `PHOENIX_ENDPOINT` is unset; otherwise `register(...)` then `Agent.instrument_all(InstrumentationSettings(tracer_provider=...))`. Top-level because step 2 reuses it. |
-| `serving/api.py` | A FastAPI `lifespan` calling `setup_tracing("serving")` — once per process, before the agent is built. |
+| `serving/api.py` | A FastAPI `lifespan` calling `setup_tracing("online")` — once per process, before the agent is built. The project is the whole online path, not this one container, so the MCP servers join the same trace in step 2. |
 
 Three things the implementation turns on:
 
@@ -92,12 +90,73 @@ What one `/agent/ask` produced, verified 2026-10-04: **14 spans** — `invoke_ag
 MCP protocol spans. Every LLM span carries `gen_ai.usage.input_tokens` /
 `output_tokens`, and an `operation.cost` figure PydanticAI computes itself.
 
+### Step 2 — the concept
+
+- **A provider is per process.** Step 1's provider sits in the serving container. It
+  cannot reach the MCP servers, so each server calls the same `setup_tracing`.
+- **The trace already crosses the boundary.** The MCP client puts the trace id in every
+  request it sends. Each server has middleware, on by default, that reads it and attaches
+  its span to the parent. Those spans exist today and are thrown away, because no
+  provider collects them. Nothing to plumb.
+- **One project, one tree.** Phoenix sets the project per exporter, and a span appears
+  under its parent only inside the same project. So every process on the online path
+  exports to one project, `online`. Ingestion takes its own later.
+- **The model calls inside the servers are invisible.** Nothing records the query
+  embedding or the DRIFT calls, so the tokens and costs in Phoenix are the serving
+  process alone. Both servers call their models through LiteLLM, so one instrumentor on
+  that one library covers both.
+
+One setup call per server, one LiteLLM instrumentor, one project rename. The result is a
+single trace per question across three containers.
+
+### Step 2 — implementation
+
+| Piece | Role |
+|---|---|
+| `openinference-instrumentation-litellm` | Dependency. Instruments LiteLLM's entry points — `completion`, `acompletion`, `CreateEmbeddings` — which is what `Embedder` and GraphRAG's `graphrag_llm` call. |
+| `telemetry.py` | One added line: `LiteLLMInstrumentor().instrument(tracer_provider=provider)`. A no-op in processes that don't use LiteLLM. |
+| `retrieval/server.py`, `graph_retrieval/server.py` | `setup_tracing("online")` in `__main__`, before `mcp.run(...)`. |
+
+Two things worth knowing:
+
+- **Don't use LiteLLM's own `callbacks = ["otel"]`.** It propagates and nests correctly,
+  but every call — chat and embedding alike — arrives as a span named
+  `raw_gen_ai_request` carrying raw request dumps (`llm.azure.messages`,
+  `llm.None.model`) and no usable token attributes. Tokens are the whole point, so the
+  instrumentor replaces it.
+- **Rebuild the MCP images, not just the code.** Their Dockerfiles install the same
+  `pyproject.toml`; the repo is bind-mounted but the dependency isn't.
+
+Verified 2026-10-04, one graph question → **one trace, 89 spans, three containers**:
+
+```
+invoke_agent agent
+  invoke_agent judge → chat gpt-5.4-mini
+  chat gpt-5.4-mini
+  execute_tool graph_search
+    tools/call graph_search
+      MCP send tools/call graph_search
+        tools/call graph_search          ← graph-retrieval container
+          acompletion × 26               ← DRIFT's model calls
+          CreateEmbeddings × 21
+```
+
+| Where | Calls | Tokens | `operation.cost` |
+|---|---|---|---|
+| serving — `chat gpt-5.4-mini` | 16 | 84,517 | $0.069 |
+| graph container — `acompletion` | 26 | 18,546 | — |
+| embeddings — `CreateEmbeddings` | 21 | 1,411 | — |
+
+The ~20k tokens below the MCP boundary were invisible before this step. Note the
+asymmetry the table shows: PydanticAI computes a cost figure, the OpenInference spans
+carry token counts only. Converting those to cost is step 3's problem.
+
 ### Step 3 — cost and latency
 
 | Signal | Where it comes from |
 |---|---|
-| **Cost** | `operation.cost` and the token attributes on each LLM span, grouped by model — the answer model, the judge, synthesis |
-| **Latency** | Span durations — the agent run for the total, `execute_tool graph_search` for the DRIFT cost, the judge for what the gate adds |
+| **Cost** | Token counts on every LLM/EMBEDDING span, grouped by model. PydanticAI's spans also carry `operation.cost`; the LiteLLM ones don't, so the DRIFT and embedding tokens still need converting to money. |
+| **Latency** | Span durations — the agent run for the total, `execute_tool graph_search` for what DRIFT costs, the judge for what the gate adds |
 
 Quality and drift need a known-good baseline to compare against, which is the eval
 harness. Postponed with it.

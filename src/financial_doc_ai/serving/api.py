@@ -29,7 +29,9 @@ from financial_doc_ai.telemetry import setup_tracing
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Once per process, before the agent is built: instrumentation is global.
-    setup_tracing("serving")
+    # "online" not "serving": the MCP servers export to the same project so the
+    # whole query, across all three containers, renders as one trace.
+    setup_tracing("online")
     yield
 
 

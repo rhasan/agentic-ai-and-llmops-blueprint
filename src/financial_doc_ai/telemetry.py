@@ -14,6 +14,7 @@ process this is*, and every container shares one ``.env``.
 import logging
 import os
 
+from openinference.instrumentation.litellm import LiteLLMInstrumentor
 from phoenix.otel import register
 from pydantic_ai import Agent, InstrumentationSettings
 
@@ -36,6 +37,16 @@ def setup_tracing(project_name: str) -> None:
         # ships each span inline as it ends.
         provider = register(endpoint=collector, project_name=project_name, batch=True)
         Agent.instrument_all(InstrumentationSettings(tracer_provider=provider))
+
+        # The model calls that don't go through PydanticAI — the query embedding in
+        # `search_filings`, GraphRAG's DRIFT calls in `graph_search` — all reach
+        # their provider via LiteLLM. This instruments its entry points, so those
+        # calls arrive as LLM/EMBEDDING spans carrying token counts. LiteLLM's own
+        # `callbacks = ["otel"]` propagates and nests correctly too, but records
+        # raw request dumps with no usable token attributes, which leaves the cost
+        # signal uncomputable. A no-op where LiteLLM is unused.
+        LiteLLMInstrumentor().instrument(tracer_provider=provider)
+
         logger.info("Tracing to Phoenix at %s (project %r).", collector, project_name)
     except Exception as e:
         # Observability is not on the critical path — same rule as the prompt

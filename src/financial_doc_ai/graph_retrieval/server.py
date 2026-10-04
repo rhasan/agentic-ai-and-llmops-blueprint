@@ -16,6 +16,7 @@ import os
 from mcp.server.mcpserver import MCPServer
 
 from financial_doc_ai.graph_retrieval.search import GraphAnswer, GraphSearch
+from financial_doc_ai.telemetry import setup_tracing
 
 mcp = MCPServer("graph")
 
@@ -41,6 +42,10 @@ async def graph_search(query: str, top_k: int = 10) -> GraphAnswer:
 
 
 if __name__ == "__main__":
+    # Same project as the serving process: the MCP SDK carries the caller's trace
+    # id, so these spans nest under the tool call that triggered them — but only
+    # within one Phoenix project.
+    setup_tracing("online")
     mcp.run(
         transport="streamable-http",
         host=os.environ.get("MCP_HOST", "0.0.0.0"),

@@ -16,6 +16,7 @@ from mcp.server.mcpserver import MCPServer
 
 from financial_doc_ai.query.rewriter import Filters
 from financial_doc_ai.retrieval.search import FilingSearch
+from financial_doc_ai.telemetry import setup_tracing
 
 mcp = MCPServer("filings")
 
@@ -48,6 +49,10 @@ def search_filings(
 
 
 if __name__ == "__main__":
+    # Same project as the serving process: the MCP SDK carries the caller's trace
+    # id, so these spans nest under the tool call that triggered them — but only
+    # within one Phoenix project.
+    setup_tracing("online")
     mcp.run(
         transport="streamable-http",
         host=os.environ.get("MCP_HOST", "0.0.0.0"),
