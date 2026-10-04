@@ -69,8 +69,8 @@ One setup function, called once when the process starts.
 
 | Piece | Role |
 |---|---|
-| `arize-phoenix-otel` | Dependency. Its `register()` builds the tracer provider and the OTLP exporter in one call, with Phoenix's defaults. |
-| `telemetry.py` (top-level) | `setup_tracing(project_name)`: return early if `PHOENIX_ENDPOINT` is unset; otherwise `register(...)` then `Agent.instrument_all(InstrumentationSettings(tracer_provider=...))`. Top-level because step 2 reuses it. |
+| `arize-phoenix-otel` | Dependency. Supplies the tracer provider, batch processor and OTLP exporter with Phoenix's defaults — either as one `register()` call or as drop-in pieces. |
+| `telemetry.py` (top-level) | `setup_tracing(project_name)`: return early if `PHOENIX_ENDPOINT` is unset; otherwise build the provider, set it as the global one, and call `Agent.instrument_all(InstrumentationSettings(tracer_provider=...))`. Top-level because step 2 reuses it. |
 | `serving/api.py` | A FastAPI `lifespan` calling `setup_tracing("online")` — once per process, before the agent is built. The project is the whole online path, not this one container, so the MCP servers join the same trace in step 2. |
 
 Three things the implementation turns on:
@@ -79,11 +79,12 @@ Three things the implementation turns on:
   URL, which is what the prompt client wants. OTLP lives at `/v1/traces` on it. Pass the
   base alone and the exporter posts to `/`, Phoenix answers **405**, and spans are
   produced and silently dropped. `telemetry.py` appends the path.
-- **`batch=True`.** The default `SimpleSpanProcessor` exports each span inline as it
-  ends — on the request path.
-- **Failure is swallowed.** `register` and `instrument_all` are wrapped; a failure logs a
-  warning and the app serves untraced. Same rule as the prompt registry's seed-file
-  fallback.
+- **Batch, not simple, processing.** A `SimpleSpanProcessor` exports each span inline as
+  it ends — on the request path.
+- **The provider is set globally.** The MCP SDK's own spans, the ones that carry the
+  trace across the transport, are written against whatever provider is global.
+- **Failure is swallowed.** Setup is wrapped; a failure logs a warning and the app serves
+  untraced. Same rule as the prompt registry's seed-file fallback.
 
 What one `/agent/ask` produced, verified 2026-10-04: **14 spans** — `invoke_agent agent`,
 `invoke_agent judge`, three `chat gpt-5.4-mini`, `execute_tool search_filings`, and the
@@ -141,25 +142,49 @@ invoke_agent agent
           CreateEmbeddings × 21
 ```
 
-| Where | Calls | Tokens | `operation.cost` |
-|---|---|---|---|
-| serving — `chat gpt-5.4-mini` | 16 | 84,517 | $0.069 |
-| graph container — `acompletion` | 26 | 18,546 | — |
-| embeddings — `CreateEmbeddings` | 21 | 1,411 | — |
-
-The ~20k tokens below the MCP boundary were invisible before this step. Note the
-asymmetry the table shows: PydanticAI computes a cost figure, the OpenInference spans
-carry token counts only. Converting those to cost is step 3's problem.
+Of that question's 104,474 tokens, the ~20,000 below the MCP boundary — 26 DRIFT
+completions and 21 embeddings — were invisible before this step. The cost that follows
+from them is step 3.
 
 ### Step 3 — cost and latency
 
 | Signal | Where it comes from |
 |---|---|
-| **Cost** | Token counts on every LLM/EMBEDDING span, grouped by model. PydanticAI's spans also carry `operation.cost`; the LiteLLM ones don't, so the DRIFT and embedding tokens still need converting to money. |
+| **Cost** | Phoenix prices each span itself, from the token counts and the model name |
 | **Latency** | Span durations — the agent run for the total, `execute_tool graph_search` for what DRIFT costs, the judge for what the gate adds |
 
 Quality and drift need a known-good baseline to compare against, which is the eval
 harness. Postponed with it.
+
+**Cost is Phoenix's job, not ours.** It ships a price table of ~200 models and multiplies
+it by each span's tokens. `gpt-5.4-mini` is in it, and DRIFT's spans price correctly even
+though they name the model `azure/gpt-5.4-mini`. Two things had to be fixed for
+embeddings, though:
+
+- **No embedding model carries a price.** Added via Phoenix's GraphQL `createModel`:
+  `text-embedding-3-small`, `$0.02` per million input tokens, output `0.0` (Phoenix
+  rejects an entry without an output price). The figure comes from LiteLLM's own price
+  map, `azure/text-embedding-3-small → input_cost_per_token: 2e-08`.
+- **Phoenix couldn't find the model to price.** It matches on `llm.model_name`, and
+  OpenInference's embedding spans record the model under `embedding.model_name`. The
+  mismatch was silent: tokens shown, cost zero, whatever price was configured.
+  `telemetry.py` wraps the span exporter and copies the name across. Spans are immutable
+  once ended, so it re-emits a copy; everything else passes through.
+
+With both in place, every model call in a trace is priced. One graph question, verified
+2026-10-04:
+
+| | calls | tokens | cost |
+|---|---|---|---|
+| serving — `chat gpt-5.4-mini` | 16 | 84,517 | $0.069249 |
+| graph container — `acompletion` | 26 | 18,546 | $0.029075 |
+| embeddings — `CreateEmbeddings` | 21 | 1,411 | $0.000028 |
+| **total** | | | **$0.098352** |
+
+Embeddings are 0.03% of the bill. That they are negligible is a thing worth *knowing*
+rather than assuming, which is the argument for pricing them at all. Note Phoenix rounds
+cost to six decimals in its summary views, so a single 3-token embedding reads as zero
+there while carrying a real `llm.cost.total` of `6e-08`.
 
 ### Open decision
 
