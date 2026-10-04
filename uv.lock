@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -253,6 +253,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/82/2f/5c36c290feebe0b2284b5e9ebd1063d71f02774bda9845d79390652aaa65/arize_phoenix_client-3.3.0.tar.gz", hash = "sha256:583f1ac7704a8dd7eb6a8d866aeb07820ce1e599ce3bdf273840f519b9a0fe55", size = 260808, upload-time = "2026-08-22T01:43:08.765Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/06/20/152d531d2d93afa2632f70dd68a2d64913b927f76904caf669da09a2804e/arize_phoenix_client-3.3.0-py3-none-any.whl", hash = "sha256:387009ba1cdb9999d1080afbdb75d052be2f2798771856ccc721f522e7fee784", size = 231351, upload-time = "2026-08-22T01:43:07.187Z" },
+]
+
+[[package]]
+name = "arize-phoenix-otel"
+version = "0.17.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "openinference-instrumentation" },
+    { name = "openinference-semantic-conventions" },
+    { name = "opentelemetry-exporter-otlp" },
+    { name = "opentelemetry-proto" },
+    { name = "opentelemetry-sdk" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/c8/665028fbbb1638f01a1d0e6c7738a44e95c826e4784d2411a36f9c08e437/arize_phoenix_otel-0.17.1.tar.gz", hash = "sha256:63baec1128a036895dd49fa50222b9deac2cdeababbcca3d0f1f9b96e615fd6b", size = 28498, upload-time = "2026-08-10T17:36:29.629Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d2/16/6027af2a69a5a150f7e2242cdc96127c912755b86c1395752582e96572bf/arize_phoenix_otel-0.17.1-py3-none-any.whl", hash = "sha256:ef2468290e73d3149729c72715267e547f5ad9a6700331dd2ca53b1a192d2a24", size = 22334, upload-time = "2026-08-10T17:36:28.038Z" },
 ]
 
 [[package]]
@@ -1279,6 +1298,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "arize-phoenix-client" },
+    { name = "arize-phoenix-otel" },
     { name = "beautifulsoup4" },
     { name = "chromadb" },
     { name = "dagster" },
@@ -1307,6 +1327,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "arize-phoenix-client", specifier = ">=3.3.0" },
+    { name = "arize-phoenix-otel", specifier = ">=0.17.0" },
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
     { name = "chromadb", specifier = ">=1.5.9" },
     { name = "dagster", specifier = ">=1.13.18" },

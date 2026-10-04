@@ -11,6 +11,8 @@ loop continues from where it paused.
 Run: `uv run uvicorn financial_doc_ai.serving.api:app --host 0.0.0.0 --port 8000`
 """
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any, Literal
 
 from fastapi import Depends, FastAPI
@@ -21,8 +23,17 @@ from pydantic_ai.tools import ToolDenied
 
 from financial_doc_ai.serving.agent import build_agent
 from financial_doc_ai.serving.answer import AnswerBlock, CitedAnswer
+from financial_doc_ai.telemetry import setup_tracing
 
-app = FastAPI(title="financial-doc-ai")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Once per process, before the agent is built: instrumentation is global.
+    setup_tracing("serving")
+    yield
+
+
+app = FastAPI(title="financial-doc-ai", lifespan=lifespan)
 
 # Lazy singleton so importing the module (e.g. in tests, which override the
 # dependency) doesn't build the agent / read env.

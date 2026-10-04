@@ -12,7 +12,7 @@ request inspection. Prompt versioning is a secondary feature served by the same 
 | Purpose | LLM tracing / observability (primary), prompt versioning (bonus) |
 | Deployment | One container, embedded **SQLite** backend, one volume for persistence |
 | Ingestion | OpenTelemetry — built-in OTLP collector (gRPC `4317`, HTTP/UI `6006`) |
-| Instrumentation | OpenInference auto-instrumentors; traces the LiteLLM → Ollama calls |
+| Instrumentation | PydanticAI's **native** OTel emission, switched on in `telemetry.py`. See *Tracing* below. |
 | License | **Elastic License 2.0 (ELv2)** — free for internal/reference use; may not be offered as a competing managed service |
 
 Run:
@@ -29,6 +29,93 @@ alongside Ollama, and it is teardownable.
 
 Being OpenTelemetry-based means no proprietary SDK: the LiteLLM clients already in the
 codebase are instrumented via OpenInference and export spans to Phoenix over OTLP.
+
+## Tracing
+
+Phoenix runs and receives nothing. No OTel code in `src/`.
+
+1. **Instrument the app** — point OpenTelemetry at Phoenix from the serving process.
+   PydanticAI emits the spans: the agent run, each model turn with its token counts,
+   each tool call.
+2. **Instrument the MCP servers** — the same setup in each server. They trace
+   independently; the traces are separate and meet only in Phoenix. Covers the LLM and
+   embedding calls made inside `search_filings` and `graph_search`.
+3. **Read cost and latency in Phoenix** — token spend per model and time spent per
+   step, from the spans the first two steps produce. Dashboard work, no new
+   instrumentation.
+
+Postponed: decision traces (grounding gate, rewriter, confirm gate, retrieval, DRIFT) —
+they go with the audit log. Also the eval harness and the quality/drift signals.
+
+Size: 1–2 sessions.
+
+### Step 1 — the concept
+
+Three ideas:
+
+- **A span** is a timed, named record of one operation with attributes — *"model call,
+  3.1s, 1,800 tokens"*. Nested spans form the trace of one request.
+- **A provider** collects spans in the process and ships them somewhere. The serving
+  process has none, so anything emitting spans today is talking to a no-op. Step 1
+  creates one and points it at Phoenix.
+- **The emission is already written.** PydanticAI knows how to describe its own agent
+  runs, model calls and tool calls as spans; it only needs switching on. We don't author
+  spans — we enable a library's.
+
+Two constraints shape the implementation: export stays off the request path, and Phoenix
+being unreachable must not break answering.
+
+One setup function, called once when the process starts.
+
+### Step 1 — implementation
+
+| Piece | Role |
+|---|---|
+| `arize-phoenix-otel` | Dependency. Its `register()` builds the tracer provider and the OTLP exporter in one call, with Phoenix's defaults. |
+| `telemetry.py` (top-level) | `setup_tracing(project_name)`: return early if `PHOENIX_ENDPOINT` is unset; otherwise `register(...)` then `Agent.instrument_all(InstrumentationSettings(tracer_provider=...))`. Top-level because step 2 reuses it. |
+| `serving/api.py` | A FastAPI `lifespan` calling `setup_tracing("serving")` — once per process, before the agent is built. |
+
+Three things the implementation turns on:
+
+- **The collector is a path, not the base URL.** `PHOENIX_ENDPOINT` is the server's base
+  URL, which is what the prompt client wants. OTLP lives at `/v1/traces` on it. Pass the
+  base alone and the exporter posts to `/`, Phoenix answers **405**, and spans are
+  produced and silently dropped. `telemetry.py` appends the path.
+- **`batch=True`.** The default `SimpleSpanProcessor` exports each span inline as it
+  ends — on the request path.
+- **Failure is swallowed.** `register` and `instrument_all` are wrapped; a failure logs a
+  warning and the app serves untraced. Same rule as the prompt registry's seed-file
+  fallback.
+
+What one `/agent/ask` produced, verified 2026-10-04: **14 spans** — `invoke_agent agent`,
+`invoke_agent judge`, three `chat gpt-5.4-mini`, `execute_tool search_filings`, and the
+MCP protocol spans. Every LLM span carries `gen_ai.usage.input_tokens` /
+`output_tokens`, and an `operation.cost` figure PydanticAI computes itself.
+
+### Step 3 — cost and latency
+
+| Signal | Where it comes from |
+|---|---|
+| **Cost** | `operation.cost` and the token attributes on each LLM span, grouped by model — the answer model, the judge, synthesis |
+| **Latency** | Span durations — the agent run for the total, `execute_tool graph_search` for the DRIFT cost, the judge for what the gate adds |
+
+Quality and drift need a known-good baseline to compare against, which is the eval
+harness. Postponed with it.
+
+### Open decision
+
+**`include_content`.** `InstrumentationSettings` defaults to sending prompt and response
+**text** to Phoenix, so filing passages and answers land in the trace store. Fine for a
+local blueprint; for a regulated deployment it is a decision, not a default — so set it
+explicitly and say why. Currently left at the default.
+
+### Traces are not the audit log
+
+[initial-system-description.md](initial-system-description.md) requires an **immutable
+7-year audit record per query, written synchronously — if the audit write fails, the
+request fails**. Phoenix traces are *not* that: they are sampled-by-default,
+retention-bounded, and best-effort by design. The audit log is a separate, still-unbuilt
+piece of work. Don't let one look like the other.
 
 ## Prompt versioning
 
